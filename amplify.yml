@@ -1,14 +1,12 @@
 version: 1
 frontend:
   phases:
-    preBuild:
+    build:
       commands:
-        - git clone https://github.com/flutter/flutter.git -b stable
+        - git clone https://github.com/flutter/flutter.git -b stable --depth 1
         - export PATH="$PATH:`pwd`/flutter/bin"
         - flutter clean
         - flutter pub get
-    build:
-      commands:
         - flutter build web --release
   artifacts:
     baseDirectory: build/web
