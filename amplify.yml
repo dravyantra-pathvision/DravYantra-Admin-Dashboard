@@ -3,7 +3,8 @@ frontend:
   phases:
     preBuild:
       commands:
-        - if [ ! -d "flutter" ]; then git clone https://github.com/flutter/flutter.git -b stable; fi
+        - rm -rf flutter
+        - git clone https://github.com/flutter/flutter.git -b 3.22.0
         - export PATH="$PATH:$PWD/flutter/bin"
         - flutter config --enable-web
     build:
