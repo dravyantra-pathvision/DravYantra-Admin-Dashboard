@@ -16,7 +16,7 @@ class AppConstants {
   // API
   static const String apiBaseUrl  = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://16.112.99.7:3000',
+    defaultValue: 'https://16-112-99-7.nip.io',
   );
 
   // Session
