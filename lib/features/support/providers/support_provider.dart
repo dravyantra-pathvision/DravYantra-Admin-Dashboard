@@ -61,15 +61,19 @@ class SupportProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchTicketDetail(String ticketNumber) async {
-    _isDetailLoading = true;
-    notifyListeners();
+  Future<void> fetchTicketDetail(String ticketNumber, {bool showLoading = true}) async {
+    if (showLoading) {
+      _isDetailLoading = true;
+      notifyListeners();
+    }
     try {
       _selectedTicket = await _service.getTicketDetail(ticketNumber);
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isDetailLoading = false;
+      if (showLoading) {
+        _isDetailLoading = false;
+      }
       notifyListeners();
     }
   }

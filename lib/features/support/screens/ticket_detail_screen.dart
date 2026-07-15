@@ -32,7 +32,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     if (!mounted) return;
     try {
       final provider = context.read<SupportProvider>();
-      await provider.fetchTicketDetail(widget.ticketNumber);
+      await provider.fetchTicketDetail(widget.ticketNumber, showLoading: false);
     } catch (e) {
       // Ignore background errors
     }
