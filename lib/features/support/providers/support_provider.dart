@@ -67,14 +67,32 @@ class SupportProvider with ChangeNotifier {
       notifyListeners();
     }
     try {
-      _selectedTicket = await _service.getTicketDetail(ticketNumber);
-    } catch (e) {
-      _error = e.toString();
-    } finally {
+      final newTicket = await _service.getTicketDetail(ticketNumber);
+      
+      bool hasChanges = false;
+      if (_selectedTicket == null || 
+          _selectedTicket!.messages.length != newTicket.messages.length ||
+          _selectedTicket!.status != newTicket.status ||
+          _selectedTicket!.priority != newTicket.priority) {
+        hasChanges = true;
+      }
+      
+      if (hasChanges || showLoading) {
+        _selectedTicket = newTicket;
+      }
+      
       if (showLoading) {
         _isDetailLoading = false;
+        notifyListeners();
+      } else if (hasChanges) {
+        notifyListeners();
       }
-      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      if (showLoading) {
+        _isDetailLoading = false;
+        notifyListeners();
+      }
     }
   }
 
