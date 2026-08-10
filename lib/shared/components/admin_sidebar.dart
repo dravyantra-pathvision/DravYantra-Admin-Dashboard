@@ -12,8 +12,8 @@ class AdminSidebar extends StatelessWidget {
     return Container(
       width: AppConstants.sidebarWidth,
       decoration: const BoxDecoration(
-        gradient: AdminTheme.sidebarGradient,
-        border: Border(right: BorderSide(color: AdminTheme.border)),
+        color: Color(0xFF0F172A), // Dark Slate Navy Sidebar matching Fleet Owner App
+        border: Border(right: BorderSide(color: Color(0xFF1E293B))),
       ),
       child: Column(
         children: [
@@ -21,9 +21,9 @@ class AdminSidebar extends StatelessWidget {
           const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.local_shipping, color: AdminTheme.primary),
+              Icon(Icons.local_shipping, color: Color(0xFF3B82F6)),
               SizedBox(width: 12),
-              Text('DravYantra', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AdminTheme.textPrimary)),
+              Text('DravYantra', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
             ],
           ),
           const SizedBox(height: 32),
@@ -31,37 +31,37 @@ class AdminSidebar extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               children: [
-                _SidebarItem(icon: Icons.dashboard, title: 'Dashboard', route: '/dashboard', currentRoute: location),
+                _SidebarItem(icon: Icons.dashboard_rounded, title: 'Dashboard', route: '/dashboard', currentRoute: location),
                 
                 const _SidebarSectionTitle(title: 'Management'),
-                _SidebarItem(icon: Icons.business, title: 'Organizations', route: '/organizations', currentRoute: location),
-                _SidebarItem(icon: Icons.groups, title: 'Fleet Owners', route: '/fleet-owners', currentRoute: location),
+                _SidebarItem(icon: Icons.business_rounded, title: 'Organizations', route: '/organizations', currentRoute: location),
+                _SidebarItem(icon: Icons.groups_rounded, title: 'Fleet Owners', route: '/fleet-owners', currentRoute: location),
                 
                 const _SidebarSectionTitle(title: 'Fleet Operations'),
-                _SidebarItem(icon: Icons.directions_car, title: 'Vehicles', route: '/vehicles', currentRoute: location),
-                _SidebarItem(icon: Icons.person_pin, title: 'Drivers', route: '/drivers', currentRoute: location),
-                _SidebarItem(icon: Icons.route, title: 'Trips', route: '/trips', currentRoute: location),
-                _SidebarItem(icon: Icons.devices, title: 'Devices', route: '/devices', currentRoute: location),
+                _SidebarItem(icon: Icons.directions_car_rounded, title: 'Vehicles', route: '/vehicles', currentRoute: location),
+                _SidebarItem(icon: Icons.person_pin_rounded, title: 'Drivers', route: '/drivers', currentRoute: location),
+                _SidebarItem(icon: Icons.route_rounded, title: 'Trips', route: '/trips', currentRoute: location),
+                _SidebarItem(icon: Icons.devices_rounded, title: 'Devices', route: '/devices', currentRoute: location),
                 
                 const _SidebarSectionTitle(title: 'Monitoring'),
-                _SidebarItem(icon: Icons.map, title: 'Live Fleet', route: '/live', currentRoute: location),
-                _SidebarItem(icon: Icons.warning, title: 'Alerts', route: '/alerts', currentRoute: location),
-                _SidebarItem(icon: Icons.analytics, title: 'Analytics', route: '/analytics', currentRoute: location),
-                _SidebarItem(icon: Icons.insert_chart, title: 'Reports', route: '/reports', currentRoute: location),
+                _SidebarItem(icon: Icons.map_rounded, title: 'Live Fleet', route: '/live', currentRoute: location),
+                _SidebarItem(icon: Icons.warning_rounded, title: 'Alerts', route: '/alerts', currentRoute: location),
+                _SidebarItem(icon: Icons.analytics_rounded, title: 'Analytics', route: '/analytics', currentRoute: location),
+                _SidebarItem(icon: Icons.insert_chart_rounded, title: 'Reports', route: '/reports', currentRoute: location),
                 
                 const _SidebarSectionTitle(title: 'Administration'),
-                _SidebarItem(icon: Icons.history, title: 'Activity Logs', route: '/audit', currentRoute: location),
-                _SidebarItem(icon: Icons.settings, title: 'Settings', route: '/settings', currentRoute: location),
-                _SidebarItem(icon: Icons.card_membership, title: 'Subscriptions', route: '/subscriptions', currentRoute: location),
-                _SidebarItem(icon: Icons.headset_mic, title: 'Support & Tickets', route: '/support', currentRoute: location),
-                _SidebarItem(icon: Icons.account_circle, title: 'Profile', route: '/profile', currentRoute: location),
+                _SidebarItem(icon: Icons.history_rounded, title: 'Activity Logs', route: '/audit', currentRoute: location),
+                _SidebarItem(icon: Icons.settings_rounded, title: 'Settings', route: '/settings', currentRoute: location),
+                _SidebarItem(icon: Icons.card_membership_rounded, title: 'Subscriptions', route: '/subscriptions', currentRoute: location),
+                _SidebarItem(icon: Icons.headset_mic_rounded, title: 'Support & Tickets', route: '/support', currentRoute: location),
+                _SidebarItem(icon: Icons.account_circle_rounded, title: 'Profile', route: '/profile', currentRoute: location),
 
               ],
             ),
           ),
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Admin Panel v1.0.0', style: TextStyle(color: AdminTheme.textMuted, fontSize: 12)),
+            child: Text('Admin Panel v1.0.0', style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
           ),
         ],
       ),
@@ -80,7 +80,7 @@ class _SidebarSectionTitle extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: const TextStyle(
-          color: AdminTheme.textMuted,
+          color: Color(0xFF64748B),
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
@@ -117,17 +117,16 @@ class _SidebarItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: isActive ? AdminTheme.sidebarActive : Colors.transparent,
-              border: Border.all(color: isActive ? AdminTheme.border : Colors.transparent),
+              color: isActive ? AdminTheme.primary : Colors.transparent,
             ),
             child: Row(
               children: [
-                Icon(icon, color: isActive ? AdminTheme.primaryLight : AdminTheme.textSecondary, size: 20),
+                Icon(icon, color: isActive ? Colors.white : const Color(0xFF94A3B8), size: 20),
                 const SizedBox(width: 12),
                 Text(
                   title,
                   style: TextStyle(
-                    color: isActive ? AdminTheme.textPrimary : AdminTheme.textSecondary,
+                    color: isActive ? Colors.white : const Color(0xFFCBD5E1),
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
