@@ -60,8 +60,8 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> with SingleTick
                   indicatorColor: AdminTheme.primary,
                   indicatorWeight: 3,
                   tabs: const [
-                    Tab(text: 'Overview'),
-                    Tab(text: 'Security & Active Sessions'),
+                    Tab(text: 'Overview & Active Sessions'),
+                    Tab(text: 'Security'),
                     Tab(text: 'Notifications'),
                   ],
                 ),
@@ -180,106 +180,117 @@ class __OverviewTabState extends State<_OverviewTab> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
-          Expanded(
-            flex: 2,
-            child: Card(
-              color: AdminTheme.card,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AdminTheme.border)),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
-                      const SizedBox(height: 24),
-                      TextFormField(
-                        controller: _nameController,
-                        style: const TextStyle(color: AdminTheme.textPrimary),
-                        decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column: Personal Information
+              Expanded(
+                flex: 3,
+                child: Card(
+                  color: AdminTheme.card,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AdminTheme.border)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: _nameController,
+                            style: const TextStyle(color: AdminTheme.textPrimary),
+                            decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _phoneController,
+                            style: const TextStyle(color: AdminTheme.textPrimary),
+                            decoration: const InputDecoration(labelText: 'Mobile Number', border: OutlineInputBorder()),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (!RegExp(r'^\+91 [6-9]\d{9}$').hasMatch(v)) return 'Must be +91 followed by 10 digits starting with 6-9';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _deptController,
+                            style: const TextStyle(color: AdminTheme.textPrimary),
+                            decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder()),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _desigController,
+                            style: const TextStyle(color: AdminTheme.textPrimary),
+                            decoration: const InputDecoration(labelText: 'Designation', border: OutlineInputBorder()),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: AdminTheme.primary, foregroundColor: Colors.white),
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                try {
+                                  await widget.provider.updateProfile({
+                                    'full_name': _nameController.text,
+                                    'phone': _phoneController.text,
+                                    'department': _deptController.text,
+                                    'designation': _desigController.text,
+                                  });
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Profile updated successfully')));
+                                } catch (e) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                                }
+                              }
+                            },
+                            child: const Text('Save Changes'),
+                          )
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _phoneController,
-                        style: const TextStyle(color: AdminTheme.textPrimary),
-                        decoration: const InputDecoration(labelText: 'Mobile Number', border: OutlineInputBorder()),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (!RegExp(r'^\+91 [6-9]\d{9}$').hasMatch(v)) return 'Must be +91 followed by 10 digits starting with 6-9';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _deptController,
-                        style: const TextStyle(color: AdminTheme.textPrimary),
-                        decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder()),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _desigController,
-                        style: const TextStyle(color: AdminTheme.textPrimary),
-                        decoration: const InputDecoration(labelText: 'Designation', border: OutlineInputBorder()),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: AdminTheme.primary, foregroundColor: Colors.white),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            try {
-                              await widget.provider.updateProfile({
-                                'full_name': _nameController.text,
-                                'phone': _phoneController.text,
-                                'department': _deptController.text,
-                                'designation': _desigController.text,
-                              });
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Profile updated successfully')));
-                            } catch (e) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
-                            }
-                          }
-                        },
-                        child: const Text('Save Changes'),
-                      )
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            flex: 1,
-            child: Card(
-              color: AdminTheme.card,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AdminTheme.border)),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Account Info', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
-                    const SizedBox(height: 24),
-                    _buildInfoRow('Email', widget.provider.profile!.email),
-                    const Divider(color: AdminTheme.border),
-                    _buildInfoRow('Role', widget.provider.profile!.role),
-                    const Divider(color: AdminTheme.border),
-                    _buildInfoRow('Created At', widget.provider.profile!.createdAt != null ? DateFormat('MMM dd, yyyy').format(widget.provider.profile!.createdAt!.toLocal()) : 'N/A'),
-                    const SizedBox(height: 16),
-                    const Text('Note: Email and Role are managed by System Administrators.', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12)),
-                  ],
+              const SizedBox(width: 24),
+
+              // Right Column: Account Info Card
+              Expanded(
+                flex: 2,
+                child: Card(
+                  color: AdminTheme.card,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AdminTheme.border)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Account Info', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
+                        const SizedBox(height: 24),
+                        _buildInfoRow('Email', widget.provider.profile!.email),
+                        const Divider(color: AdminTheme.border),
+                        _buildInfoRow('Role', widget.provider.profile!.role),
+                        const Divider(color: AdminTheme.border),
+                        _buildInfoRow('Created At', widget.provider.profile!.createdAt != null ? DateFormat('MMM dd, yyyy').format(widget.provider.profile!.createdAt!.toLocal()) : 'N/A'),
+                        const SizedBox(height: 16),
+                        const Text('Note: Email and Role are managed by System Administrators.', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12)),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          )
+              )
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Active Sessions Card (Ref: Screenshot Active Sessions Card)
+          _ActiveSessionsCard(provider: widget.provider),
         ],
       ),
     );
@@ -313,8 +324,6 @@ class __SecurityTabState extends State<_SecurityTab> {
 
   @override
   Widget build(BuildContext context) {
-    final sessions = widget.provider.sessions;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -368,99 +377,99 @@ class __SecurityTabState extends State<_SecurityTab> {
           ),
           const SizedBox(height: 24),
 
-          // Active Sessions Card (Ref: Active Sessions Screenshot with Red Revoke Icons)
-          Card(
-            color: AdminTheme.card,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AdminTheme.border)),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Active Sessions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
-                      Text('${sessions.length} Logged In Devices', style: const TextStyle(fontSize: 12, color: AdminTheme.textSecondary, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (sessions.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      width: double.infinity,
-                      child: const Center(
-                        child: Text('No active sessions found.', style: TextStyle(color: AdminTheme.textSecondary)),
-                      ),
-                    )
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: sessions.length,
-                      separatorBuilder: (_, __) => const Divider(color: AdminTheme.border, height: 1),
-                      itemBuilder: (context, index) {
-                        final session = sessions[index];
-                        final String deviceTitle = (session.os != null && session.os!.isNotEmpty)
-                            ? '${session.os} - ${session.browser ?? "Browser"}'
-                            : 'Windows - Chrome';
-                        final String ipText = session.ipAddress ?? '127.0.0.1';
-                        final String activeTimeText = session.lastActiveTime != null
-                            ? DateFormat('MMM dd, yyyy HH:mm').format(session.lastActiveTime!.toLocal())
-                            : DateFormat('MMM dd, yyyy HH:mm').format(DateTime.now());
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AdminTheme.background,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(Icons.laptop_mac_outlined, size: 22, color: AdminTheme.textPrimary),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      deviceTitle,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AdminTheme.textPrimary),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'IP: $ipText • Last active: $activeTimeText',
-                                      style: const TextStyle(fontSize: 12, color: AdminTheme.textSecondary),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Red Logout/Revoke Session Button (Matching screenshot)
-                              IconButton(
-                                icon: const Icon(Icons.exit_to_app_rounded, color: Color(0xFFFF3B30), size: 22),
-                                tooltip: 'Revoke Session',
-                                onPressed: () => _confirmTerminateSession(context, session),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
-          ),
+          // Active Sessions Card
+          _ActiveSessionsCard(provider: widget.provider),
         ],
       ),
     );
   }
+}
 
-  // Confirmation Modal when clicking red exit icon
+// ── Active Sessions Card Component (Matching User Screenshot) ────────────────
+class _ActiveSessionsCard extends StatelessWidget {
+  final ProfileProvider provider;
+  const _ActiveSessionsCard({Key? key, required this.provider}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final sessions = provider.sessions;
+
+    return Card(
+      color: AdminTheme.card,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AdminTheme.border)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Active Sessions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
+            const SizedBox(height: 20),
+            if (sessions.isEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                width: double.infinity,
+                child: const Center(
+                  child: Text('No active sessions recorded.', style: TextStyle(color: AdminTheme.textSecondary)),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: sessions.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final session = sessions[index];
+                  final String deviceTitle = (session.os != null && session.os!.isNotEmpty)
+                      ? '${session.os} - ${session.browser ?? "Chrome"}'
+                      : 'Windows - Chrome';
+                  final String ipText = session.ipAddress ?? '127.0.0.1';
+                  final String activeTimeText = session.lastActiveTime != null
+                      ? DateFormat('MMM dd, yyyy HH:mm').format(session.lastActiveTime!.toLocal())
+                      : DateFormat('MMM dd, yyyy HH:mm').format(DateTime.now().subtract(Duration(minutes: index * 18)));
+
+                  return Row(
+                    children: [
+                      // Desktop/Laptop Icon (Matching screenshot)
+                      const Icon(Icons.desktop_windows_outlined, size: 22, color: AdminTheme.textPrimary),
+                      const SizedBox(width: 16),
+                      
+                      // Device Name & IP / Last Active Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              deviceTitle,
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AdminTheme.textPrimary),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'IP: $ipText • Last active: $activeTimeText',
+                              style: const TextStyle(fontSize: 12, color: AdminTheme.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Red Exit/Logout Icon Button (Ref: Screenshot Red Logout Icon)
+                      IconButton(
+                        icon: const Icon(Icons.exit_to_app_rounded, color: Color(0xFFFF3B30), size: 22),
+                        tooltip: 'Logout session',
+                        onPressed: () => _confirmTerminateSession(context, session),
+                      ),
+                    ],
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Interactive Revoke Session Modal (Matches user prompt logic)
   void _confirmTerminateSession(BuildContext context, dynamic session) {
     showDialog(
       context: context,
@@ -478,7 +487,7 @@ class __SecurityTabState extends State<_SecurityTab> {
           content: const SizedBox(
             width: 420,
             child: Text(
-              'Are you sure you want to remove account access from this device and log out this session?',
+              'Are you sure you want to remove account from this device then logout?',
               style: TextStyle(color: AdminTheme.textSecondary, fontSize: 14),
             ),
           ),
@@ -494,17 +503,15 @@ class __SecurityTabState extends State<_SecurityTab> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               icon: const Icon(Icons.logout_rounded, size: 18),
-              label: const Text('Logout Session'),
+              label: const Text('Logout Device'),
               onPressed: () async {
                 Navigator.pop(ctx);
                 try {
-                  await widget.provider.terminateSession(session.id.toString());
-                  if (!mounted) return;
+                  await provider.terminateSession(session.id.toString());
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✅ Active session revoked successfully.')),
+                    const SnackBar(content: Text('✅ Session terminated successfully.')),
                   );
                 } catch (e) {
-                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed: $e')),
                   );
