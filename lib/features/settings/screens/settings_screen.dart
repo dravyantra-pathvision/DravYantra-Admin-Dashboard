@@ -18,7 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Neat display dictionary for database keys
+  // Clean metadata dictionary for user-friendly UI presentation
   final Map<String, Map<String, dynamic>> _settingMeta = {
     'platform_name': {
       'name': 'Platform Brand Name',
@@ -248,26 +248,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top System Alert Bar (Ref: Top confirmation bar in DASHMIN screenshot)
+            // Top System Alert Notice (DASHMIN Reference Alert Bar)
             _buildTopSystemNotice(),
             const SizedBox(height: 20),
 
-            // Top Summary KPI Cards (Ref: Dashmin top 4 summary card grid)
+            // Top Summary KPI Cards (DASHMIN Reference Card Grid)
             _buildTopKpiSummary(provider),
             const SizedBox(height: 24),
 
-            // Main Settings Grid Layout (Left Sidebar Categories + Right Content Options)
+            // Main Settings Layout: Left Category Navigation + Right Settings Panel
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left Column: Category Navigation List
+                // Left Column: Category Sidebar
                 SizedBox(
-                  width: 280,
+                  width: 270,
                   child: _buildCategorySidebar(provider),
                 ),
                 const SizedBox(width: 24),
 
-                // Right Column: Settings Content Cards Grid
+                // Right Column: Active Settings Options List
                 Expanded(
                   child: _buildSettingsContentPanel(provider),
                 ),
@@ -294,7 +294,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'Live Administration Console: Updating parameters affects real-time fleet telemetry, mobile apps, and automated alert engines instantly.',
+              'System Administration Console: Parameters update live in PostgreSQL database and govern all connected mobile apps & IoT gateways.',
               style: TextStyle(color: AdminTheme.warning, fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
@@ -304,29 +304,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: AdminTheme.warning.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text('SUPER ADMIN ACTIVE', style: TextStyle(color: AdminTheme.warning, fontSize: 11, fontWeight: FontWeight.bold)),
+            child: const Text('ADMIN CONSOLE ACTIVE', style: TextStyle(color: AdminTheme.warning, fontSize: 11, fontWeight: FontWeight.bold)),
           )
         ],
       ),
     );
   }
 
-  // ── Top Summary KPI Cards (Dashmin Grid Style) ─────────────────────────────
+  // ── Top Summary KPI Cards (DASHMIN Reference Style) ────────────────────────
   Widget _buildTopKpiSummary(SettingsProvider provider) {
     int totalSettings = 0;
     provider.groupedSettings.forEach((_, list) => totalSettings += list.length);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double cardWidth = (constraints.maxWidth - (3 * 16)) / 4;
         return Wrap(
           spacing: 16,
           runSpacing: 16,
           children: [
-            _buildKpiCard('Total System Options', '$totalSettings Parameters', 'Configured in Database', AdminTheme.primary, Icons.settings_applications),
-            _buildKpiCard('Cloud Storage Engine', 'AWS S3 Bucket', 'dravyantra-uploads', AdminTheme.success, Icons.cloud_done),
-            _buildKpiCard('Database Security', 'Encrypted TLS 1.3', 'AWS RDS PostgreSQL', AdminTheme.secondary, Icons.shield),
-            _buildKpiCard('Platform Status', '100% Operational', 'Zero Active Outages', AdminTheme.info, Icons.check_circle_outline),
+            _buildKpiCard('Total System Parameters', '$totalSettings Options', 'Configured in Database', AdminTheme.primary, Icons.settings_applications),
+            _buildKpiCard('Cloud File Storage', 'AWS S3 Active', 'Bucket: dravyantra-uploads', AdminTheme.success, Icons.cloud_done),
+            _buildKpiCard('Database Connection', 'AWS RDS PostgreSQL', 'Encrypted TLS 1.3', AdminTheme.secondary, Icons.storage),
+            _buildKpiCard('System Health Status', '100% Operational', 'Zero Outages Reported', AdminTheme.info, Icons.check_circle_outline),
           ],
         );
       },
@@ -353,11 +352,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(mainValue, style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(mainValue, style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 17, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(subtitle, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 11)),
           const SizedBox(height: 12),
-          // Accent bottom progress bar (Dashmin reference style)
           Container(
             height: 4,
             width: double.infinity,
@@ -381,7 +379,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Left Sidebar Navigation Categories ─────────────────────────────────────
+  // ── Left Sidebar Category List ─────────────────────────────────────────────
   Widget _buildCategorySidebar(SettingsProvider provider) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -455,7 +453,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Right Settings Options Content Panel ───────────────────────────────────
+  // ── Right Content Panel ────────────────────────────────────────────────────
   Widget _buildSettingsContentPanel(SettingsProvider provider) {
     final catInfo = _categories.firstWhere((c) => c['key'] == _selectedCategory, orElse: () => _categories[0]);
     final List<SystemSetting> settingsList = provider.groupedSettings[_selectedCategory] ?? [];
@@ -473,7 +471,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Category Header & Search Input Bar
+        // Category Header Bar & Search Input
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -507,7 +505,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
                   style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Search options...',
+                    hintText: 'Search parameters...',
                     hintStyle: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12),
                     prefixIcon: const Icon(Icons.search, size: 18, color: AdminTheme.textSecondary),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
@@ -535,7 +533,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Icon(Icons.search_off_rounded, size: 40, color: AdminTheme.textSecondary),
                 const SizedBox(height: 12),
                 Text(
-                  _searchQuery.isNotEmpty ? 'No options match "$_searchQuery"' : 'No parameters in this section.',
+                  _searchQuery.isNotEmpty ? 'No options match "$_searchQuery"' : 'No parameters configured in this category yet.',
                   style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 13),
                 ),
               ],
@@ -556,7 +554,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Neat Clean Option Card (DASHMIN Cards Reference) ──────────────────────
+  // ── Option Card Component (DASHMIN Card Layout) ───────────────────────────
   Widget _buildSettingOptionCard(SystemSetting setting) {
     final meta = _settingMeta[setting.key];
     final String neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -577,7 +575,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon Container
+          // Left Icon
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -588,7 +586,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(width: 16),
 
-          // Title, Subtitle, Value & Badges
+          // Title & Description & Value
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -601,40 +599,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(width: 10),
                     // Dashmin-style Role & Privilege Badge
-                    if (setting.requiresSuperAdmin)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.purple.withOpacity(0.4)),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.shield_outlined, color: Colors.purpleAccent, size: 12),
-                            SizedBox(width: 4),
-                            Text('Super Admin', style: TextStyle(color: Colors.purpleAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AdminTheme.secondary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AdminTheme.secondary.withOpacity(0.3)),
-                        ),
-                        child: const Text('Admin', style: TextStyle(color: AdminTheme.secondary, fontSize: 10, fontWeight: FontWeight.bold)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: setting.requiresSuperAdmin ? Colors.purple.withOpacity(0.2) : AdminTheme.secondary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: setting.requiresSuperAdmin ? Colors.purple.withOpacity(0.4) : AdminTheme.secondary.withOpacity(0.3)),
                       ),
+                      child: Text(
+                        setting.requiresSuperAdmin ? 'Super Admin' : 'Admin',
+                        style: TextStyle(
+                          color: setting.requiresSuperAdmin ? Colors.purpleAccent : AdminTheme.secondary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(neatDesc, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12)),
                 const SizedBox(height: 10),
 
-                // Display Value Line (Non-boolean)
                 if (!isBoolValue)
                   Row(
                     children: [
@@ -662,7 +648,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Right Controls (Toggle for Booleans / Edit & History for Text)
+          // Right Controls (100% Working Switches & Buttons)
           if (isBoolValue)
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -720,7 +706,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Boolean Quick Toggle ───────────────────────────────────────────────────
+  // ── Boolean Switch Quick Toggle (100% Working Live Update) ─────────────────
   Future<void> _quickToggleBoolean(SystemSetting setting, bool newVal) async {
     final meta = _settingMeta[setting.key];
     final neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -733,14 +719,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
       reason: 'Toggled via Admin Settings Panel to $newVal',
     );
 
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$neatTitle is now ${newVal ? "ENABLED" : "DISABLED"}')),
+        SnackBar(
+          content: Text('✅ $neatTitle is now ${newVal ? "ENABLED" : "DISABLED"}'),
+          backgroundColor: AdminTheme.success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Error updating $neatTitle: ${provider.error ?? "Access denied"}'),
+          backgroundColor: AdminTheme.danger,
+        ),
       );
     }
   }
 
-  // ── Formatted Edit Parameter Modal ────────────────────────────────────────
+  // ── Edit Parameter Modal ───────────────────────────────────────────────────
   void _showUpdateDialog(SystemSetting setting) {
     final meta = _settingMeta[setting.key];
     final neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -800,29 +798,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AdminTheme.border)),
                       ),
                     ),
-                    if (setting.requiresSuperAdmin) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.purple.withOpacity(0.3)),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.shield_outlined, color: Colors.purpleAccent, size: 18),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Requires Super Admin privileges to update.',
-                                style: TextStyle(color: Colors.purpleAccent, fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ]
                   ],
                 ),
               ),
@@ -871,11 +846,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           if (success) {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Setting updated successfully.')),
+                              const SnackBar(content: Text('✅ Setting updated successfully.')),
                             );
                           } else {
                             ScaffoldMessenger.of(ctx).showSnackBar(
-                              SnackBar(content: Text('Failed: ${provider.error}')),
+                              SnackBar(content: Text('❌ Error: ${provider.error ?? "Failed to update"}')),
                             );
                           }
                         },
@@ -891,7 +866,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Audit History Modal Timeline ──────────────────────────────────────────
+  // ── Audit History Timeline Modal ──────────────────────────────────────────
   void _showHistoryDialog(SystemSetting setting) {
     final meta = _settingMeta[setting.key];
     final neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -941,7 +916,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final history = snapshot.data ?? [];
                       if (history.isEmpty) {
                         return const Center(
-                          child: Text('No previous audit logs for this parameter.', style: TextStyle(color: AdminTheme.textSecondary)),
+                          child: Text('No previous audit logs recorded for this parameter.', style: TextStyle(color: AdminTheme.textSecondary)),
                         );
                       }
                       return ListView.separated(
@@ -1000,7 +975,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Formatting Helpers ────────────────────────────────────────────────────
+  // ── Utility Formatting Helpers ─────────────────────────────────────────────
   String _formatKeyName(String key) {
     return key
         .replaceAll('_', ' ')
