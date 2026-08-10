@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/profile_provider.dart';
+import '../../../features/authentication/providers/auth_provider.dart';
 import '../../../app/constants.dart';
 import '../../../app/theme.dart';
 
@@ -507,11 +508,25 @@ class _ActiveSessionsCard extends StatelessWidget {
               onPressed: () async {
                 Navigator.pop(ctx);
                 try {
-                  await provider.terminateSession(session.id.toString());
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✅ Session terminated successfully.')),
-                  );
+                  final String sessionId = session.id.toString();
+                  final bool isCurrentDevice = provider.sessions.isNotEmpty && provider.sessions.first.id.toString() == sessionId;
+
+                  await provider.terminateSession(sessionId);
+
+                  if (!context.mounted) return;
+
+                  if (isCurrentDevice) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✅ Session terminated. Logging out of this device...')),
+                    );
+                    await context.read<AuthProvider>().logout();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✅ Device session terminated & revoked from database.')),
+                    );
+                  }
                 } catch (e) {
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed: $e')),
                   );
