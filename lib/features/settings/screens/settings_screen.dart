@@ -18,18 +18,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Clean metadata dictionary for user-friendly UI presentation
+  // Clean metadata dictionary mapping raw keys to human-readable titles, descriptions, icons, and units
   final Map<String, Map<String, dynamic>> _settingMeta = {
+    // 1. General & Branding
     'platform_name': {
       'name': 'Platform Brand Name',
       'desc': 'Primary title displayed across mobile apps, admin portal, and emails',
       'icon': Icons.business_rounded,
       'unit': '',
     },
-    'logo_url': {
-      'name': 'Platform Logo Image URL',
-      'desc': 'Hosted URL for official company logo image',
-      'icon': Icons.image_rounded,
+    'support_email': {
+      'name': 'Customer Helpdesk Email',
+      'desc': 'Official support email address rendered in mobile app help centers',
+      'icon': Icons.mark_email_read_rounded,
+      'unit': '',
+    },
+    'support_phone': {
+      'name': 'Toll-Free Helpline Number',
+      'desc': 'Emergency contact phone number rendered in mobile app help centers',
+      'icon': Icons.phone_in_talk_rounded,
       'unit': '',
     },
     'default_timezone': {
@@ -38,16 +45,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'icon': Icons.schedule_rounded,
       'unit': '',
     },
+    'default_currency': {
+      'name': 'Default Billing Currency',
+      'desc': 'Base currency symbol for fuel cost calculations & subscription plans',
+      'icon': Icons.currency_rupee_rounded,
+      'unit': '',
+    },
     'default_language': {
       'name': 'Default Interface Language',
       'desc': 'Primary language code for system notifications and UI text',
       'icon': Icons.translate_rounded,
       'unit': '',
     },
-    'theme': {
-      'name': 'Default UI Theme Mode',
-      'desc': 'Global appearance theme for fleet dashboard and portal',
-      'icon': Icons.palette_rounded,
+
+    // 2. Fleet Telemetry & Safety Rules
+    'overspeed_threshold_kmh': {
+      'name': 'Global Speed Limit Ceiling',
+      'desc': 'Speed ceiling in km/h triggering real-time over-speed violation alerts',
+      'icon': Icons.speed_rounded,
+      'unit': 'km/h',
+    },
+    'telemetry_ping_interval_sec': {
+      'name': 'IoT Telemetry Ping Rate',
+      'desc': 'Frequency of GPS hardware telemetry transmission to backend',
+      'icon': Icons.sensors_rounded,
+      'unit': 'sec',
+    },
+    'offline_device_timeout_min': {
+      'name': 'Device Disconnect Timeout',
+      'desc': 'Inactivity duration without telemetry before marking vehicle offline',
+      'icon': Icons.wifi_off_rounded,
+      'unit': 'mins',
+    },
+    'auto_close_trip_min': {
+      'name': 'Automatic Trip End Timeout',
+      'desc': 'Stationary vehicle duration in minutes after which an ongoing trip auto-ends',
+      'icon': Icons.auto_delete_rounded,
+      'unit': 'mins',
+    },
+
+    // 3. Fuel Theft & Risk Intelligence
+    'fuel_theft_threshold_pct': {
+      'name': 'Fuel Theft Drop Sensitivity',
+      'desc': 'Sudden fuel level drop percentage that flags a potential theft incident',
+      'icon': Icons.local_gas_station_rounded,
+      'unit': '%',
+    },
+    'idle_threshold_minutes': {
+      'name': 'Idling Waste Alert Timeout',
+      'desc': 'Duration of stationary engine operation to flag idle fuel waste',
+      'icon': Icons.timer_off_rounded,
+      'unit': 'mins',
+    },
+    'standard_fuel_price_per_liter': {
+      'name': 'Benchmark Fuel Price (INR)',
+      'desc': 'Default fuel cost per liter used for fleet financial calculations',
+      'icon': Icons.payments_rounded,
+      'unit': '₹/L',
+    },
+    'harsh_driving_gforce_threshold': {
+      'name': 'Harsh Driving G-Force Threshold',
+      'desc': 'Accelerometer G-force ceiling triggering harsh braking or acceleration alerts',
+      'icon': Icons.warning_amber_rounded,
+      'unit': 'g',
+    },
+
+    // 4. WhatsApp, SMS & Email Gateways
+    'whatsapp_gateway_enabled': {
+      'name': 'WhatsApp Alert Gateway',
+      'desc': 'Enables real-time WhatsApp alert notifications dispatched to Fleet Owners',
+      'icon': Icons.chat_rounded,
+      'unit': '',
+    },
+    'sms_emergency_enabled': {
+      'name': 'SMS Emergency Alert Gateway',
+      'desc': 'Enables instant SMS dispatch for critical vehicle safety alerts',
+      'icon': Icons.sms_rounded,
       'unit': '',
     },
     'smtp_host': {
@@ -63,29 +136,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'unit': 'port',
     },
     'smtp_user': {
-      'name': 'SMTP Account Username',
-      'desc': 'Email account username for sending system emails',
+      'name': 'System Notification Email',
+      'desc': 'Email account address used for sending platform notification emails',
       'icon': Icons.email_rounded,
       'unit': '',
     },
-    'smtp_password': {
-      'name': 'SMTP Account Password',
-      'desc': 'Encrypted credential for mail server authentication',
-      'icon': Icons.key_rounded,
-      'unit': '',
-    },
-    'otp_length': {
-      'name': 'OTP Passcode Digits',
-      'desc': 'Length of 2FA and password-reset verification codes',
-      'icon': Icons.password_rounded,
-      'unit': 'digits',
-    },
     'otp_expiry_minutes': {
-      'name': 'OTP Expiration Time',
-      'desc': 'Validity period in minutes for generated verification OTPs',
+      'name': 'OTP Validity Window',
+      'desc': 'Expiration duration in minutes for login & verification OTP passcodes',
       'icon': Icons.timer_rounded,
       'unit': 'mins',
     },
+
+    // 5. AWS S3, Maps & Integrations
+    'cloud_storage_bucket': {
+      'name': 'AWS S3 Storage Bucket',
+      'desc': 'AWS S3 cloud bucket storing driver photos & vehicle documents',
+      'icon': Icons.cloud_done_rounded,
+      'unit': '',
+    },
+    'aws_region': {
+      'name': 'AWS Data Center Region',
+      'desc': 'Active AWS datacenter location hosting S3 cloud bucket',
+      'icon': Icons.location_city_rounded,
+      'unit': '',
+    },
+    'map_provider': {
+      'name': 'GIS Mapping Engine',
+      'desc': 'Map tile provider for vehicle live tracking & route playback',
+      'icon': Icons.map_rounded,
+      'unit': '',
+    },
+    'payment_gateway': {
+      'name': 'Subscription Payment Processor',
+      'desc': 'Primary payment gateway integration for fleet subscription renewals',
+      'icon': Icons.credit_card_rounded,
+      'unit': '',
+    },
+
+    // 6. Security, Sessions & Compliance
     'jwt_expiry_hours': {
       'name': 'Admin Token Validity',
       'desc': 'Expiration duration in hours for admin authentication JWT tokens',
@@ -122,57 +211,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'icon': Icons.speed_rounded,
       'unit': 'req/min',
     },
-    'overspeed_threshold_kmh': {
-      'name': 'Global Speed Limit Ceiling',
-      'desc': 'Speed limit threshold in km/h to trigger real-time over-speed alert',
-      'icon': Icons.speed_rounded,
-      'unit': 'km/h',
+    'audit_log_retention_days': {
+      'name': 'Audit Log Retention Window',
+      'desc': 'Duration in days to retain administrative activity logs in database',
+      'icon': Icons.history_toggle_off_rounded,
+      'unit': 'days',
     },
-    'fuel_theft_threshold_pct': {
-      'name': 'Fuel Theft Sensitivity',
-      'desc': 'Sudden fuel level drop percentage that flags a potential theft incident',
-      'icon': Icons.local_gas_station_rounded,
-      'unit': '%',
-    },
-    'idle_threshold_minutes': {
-      'name': 'Idling Waste Timeout',
-      'desc': 'Duration of stationary engine operation to flag idle fuel waste',
-      'icon': Icons.timer_off_rounded,
-      'unit': 'mins',
-    },
-    'heartbeat_timeout_minutes': {
-      'name': 'IoT Disconnect Timeout',
-      'desc': 'Time without device telemetry before marking vehicle offline',
-      'icon': Icons.wifi_off_rounded,
-      'unit': 'mins',
-    },
-    'map_provider': {
-      'name': 'GIS Mapping Engine',
-      'desc': 'Mapping provider for vehicle tracking & route calculations',
-      'icon': Icons.map_rounded,
-      'unit': '',
-    },
-    'cloud_storage_provider': {
-      'name': 'Cloud File Storage Engine',
-      'desc': 'Primary cloud storage bucket service (AWS S3 / Supabase)',
-      'icon': Icons.cloud_rounded,
-      'unit': '',
-    },
+
+    // 7. System Maintenance & Backups
     'maintenance_mode': {
       'name': 'Platform Maintenance Mode',
-      'desc': 'Blocks non-administrator logins during system upgrades',
+      'desc': 'Restricts non-admin portal & mobile app logins during system upgrades',
       'icon': Icons.build_circle_rounded,
       'unit': '',
     },
+    'maintenance_message': {
+      'name': 'Maintenance Notice Text',
+      'desc': 'Banner text displayed to users when maintenance mode is active',
+      'icon': Icons.announcement_rounded,
+      'unit': '',
+    },
     'audit_logging_enabled': {
-      'name': 'Global Audit Event Logging',
-      'desc': 'Records all administrative actions and security events to database',
+      'name': 'Global Audit Log Tracking',
+      'desc': 'Records all administrative operations and security events in database',
       'icon': Icons.history_edu_rounded,
       'unit': '',
     },
     'backup_enabled': {
       'name': 'Automated DB Backups',
-      'desc': 'Enables scheduled nightly backups of PostgreSQL database',
+      'desc': 'Enables automated nightly database backups to AWS S3 storage',
       'icon': Icons.backup_rounded,
       'unit': '',
     },
@@ -187,39 +254,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final List<Map<String, dynamic>> _categories = [
     {
       'key': 'general',
-      'label': 'General & Branding',
-      'icon': Icons.tune_rounded,
-      'desc': 'Platform identity, timezone, language, and theme preferences',
+      'label': 'Platform Identity & Branding',
+      'icon': Icons.business_rounded,
+      'desc': 'Platform name, helpline contacts, currency, timezone & language defaults',
     },
     {
-      'key': 'notifications',
-      'label': 'Alerts & Communications',
-      'icon': Icons.notifications_active_outlined,
-      'desc': 'SMTP email gateway, OTP rules, and alert channels',
-    },
-    {
-      'key': 'security',
-      'label': 'Security & Auth Controls',
-      'icon': Icons.security_rounded,
-      'desc': 'Password complexity, session timeouts, and rate limits',
-    },
-    {
-      'key': 'thresholds',
-      'label': 'Fleet & IoT Thresholds',
+      'key': 'telemetry',
+      'label': 'Fleet Telemetry & Safety',
       'icon': Icons.speed_rounded,
-      'desc': 'Speed ceilings, fuel theft sensitivity, and idling limits',
+      'desc': 'Global speed limit ceilings, IoT ping intervals & offline device timeouts',
+    },
+    {
+      'key': 'fuel_risk',
+      'label': 'Fuel Theft & Risk Intelligence',
+      'icon': Icons.local_gas_station_rounded,
+      'desc': 'Fuel drop theft sensitivity, idling waste limits & benchmark fuel prices',
+    },
+    {
+      'key': 'communications',
+      'label': 'WhatsApp, SMS & Mail Gateways',
+      'icon': Icons.notifications_active_rounded,
+      'desc': 'WhatsApp alert dispatcher, emergency SMS gateways & SMTP mail servers',
     },
     {
       'key': 'integrations',
-      'label': 'Cloud Storage & APIs',
-      'icon': Icons.cloud_done_outlined,
-      'desc': 'AWS S3 bucket configuration, GIS maps, and API keys',
+      'label': 'Cloud Storage & Integrations',
+      'icon': Icons.cloud_done_rounded,
+      'desc': 'AWS S3 bucket configuration, GIS mapping engines & payment processors',
+    },
+    {
+      'key': 'security',
+      'label': 'Security & Access Control',
+      'icon': Icons.security_rounded,
+      'desc': 'Session token expirations, password policies & API rate limiters',
     },
     {
       'key': 'system',
-      'label': 'System & Maintenance',
+      'label': 'System Maintenance & Backups',
       'icon': Icons.dns_rounded,
-      'desc': 'Maintenance mode, automated backups, and audit logs',
+      'desc': 'Platform maintenance mode toggle, audit logging & automated backups',
     },
   ];
 
@@ -248,26 +321,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top System Alert Notice (DASHMIN Reference Alert Bar)
+            // Top Operational Health Banner
             _buildTopSystemNotice(),
             const SizedBox(height: 20),
 
-            // Top Summary KPI Cards (DASHMIN Reference Card Grid)
+            // Top Summary KPI Cards (Matching Fleet Owner App Palette)
             _buildTopKpiSummary(provider),
             const SizedBox(height: 24),
 
-            // Main Settings Layout: Left Category Navigation + Right Settings Panel
+            // Main Settings Layout: Left Category Navigation + Right Active Panel
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left Column: Category Sidebar
+                // Left Column: Category Sidebar List
                 SizedBox(
-                  width: 270,
+                  width: 290,
                   child: _buildCategorySidebar(provider),
                 ),
                 const SizedBox(width: 24),
 
-                // Right Column: Active Settings Options List
+                // Right Column: Active Settings Options Cards
                 Expanded(
                   child: _buildSettingsContentPanel(provider),
                 ),
@@ -279,39 +352,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Top System Alert Notice ────────────────────────────────────────────────
+  // ── Top Operational Notice ─────────────────────────────────────────────────
   Widget _buildTopSystemNotice() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: AdminTheme.warning.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AdminTheme.warning.withOpacity(0.3)),
+        color: AdminTheme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AdminTheme.primary.withOpacity(0.2)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: AdminTheme.warning, size: 20),
+          const Icon(Icons.shield_outlined, color: AdminTheme.primary, size: 20),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'System Administration Console: Parameters update live in PostgreSQL database and govern all connected mobile apps & IoT gateways.',
-              style: TextStyle(color: AdminTheme.warning, fontSize: 13, fontWeight: FontWeight.w500),
+              'DravYantra System Administration: Parameters update live in PostgreSQL database and govern telemetry, mobile apps & gateways instantly.',
+              style: TextStyle(color: AdminTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AdminTheme.warning.withOpacity(0.2),
+              color: AdminTheme.primary,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text('ADMIN CONSOLE ACTIVE', style: TextStyle(color: AdminTheme.warning, fontSize: 11, fontWeight: FontWeight.bold)),
+            child: const Text('ADMIN ACTIVE', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
           )
         ],
       ),
     );
   }
 
-  // ── Top Summary KPI Cards (DASHMIN Reference Style) ────────────────────────
+  // ── Top Summary KPI Cards ──────────────────────────────────────────────────
   Widget _buildTopKpiSummary(SettingsProvider provider) {
     int totalSettings = 0;
     provider.groupedSettings.forEach((_, list) => totalSettings += list.length);
@@ -322,10 +395,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           spacing: 16,
           runSpacing: 16,
           children: [
-            _buildKpiCard('Total System Parameters', '$totalSettings Options', 'Configured in Database', AdminTheme.primary, Icons.settings_applications),
-            _buildKpiCard('Cloud File Storage', 'AWS S3 Active', 'Bucket: dravyantra-uploads', AdminTheme.success, Icons.cloud_done),
-            _buildKpiCard('Database Connection', 'AWS RDS PostgreSQL', 'Encrypted TLS 1.3', AdminTheme.secondary, Icons.storage),
-            _buildKpiCard('System Health Status', '100% Operational', 'Zero Outages Reported', AdminTheme.info, Icons.check_circle_outline),
+            _buildKpiCard('Total System Parameters', '$totalSettings Options', 'Configured across 7 Domains', AdminTheme.primary, Icons.tune_rounded),
+            _buildKpiCard('AWS Cloud Storage', 'AWS S3 Active', 'Bucket: dravyantra-uploads', AdminTheme.success, Icons.cloud_done_rounded),
+            _buildKpiCard('Database Connection', 'AWS RDS PostgreSQL', 'Encrypted TLS 1.3', AdminTheme.info, Icons.storage_rounded),
+            _buildKpiCard('Platform Status', '100% Operational', 'Zero Outages Reported', AdminTheme.secondary, Icons.check_circle_rounded),
           ],
         );
       },
@@ -360,7 +433,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             height: 4,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AdminTheme.border,
+              color: AdminTheme.background,
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -379,7 +452,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Left Sidebar Category List ─────────────────────────────────────────────
+  // ── Left Sidebar Category Navigation ───────────────────────────────────────
   Widget _buildCategorySidebar(SettingsProvider provider) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -391,7 +464,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('CATEGORIES', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+          const Text('SETTINGS DOMAINS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
           const SizedBox(height: 16),
           ..._categories.map((cat) {
             final key = cat['key'] as String;
@@ -406,7 +479,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? AdminTheme.primary.withOpacity(0.15) : Colors.transparent,
+                    color: isSelected ? AdminTheme.primary.withOpacity(0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isSelected ? AdminTheme.primary : Colors.transparent,
@@ -421,7 +494,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Text(
                           cat['label'] as String,
                           style: TextStyle(
-                            color: isSelected ? AdminTheme.textPrimary : AdminTheme.textSecondary,
+                            color: isSelected ? AdminTheme.primary : AdminTheme.textPrimary,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                             fontSize: 13,
                           ),
@@ -430,7 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: isSelected ? AdminTheme.primary : AdminTheme.surface,
+                          color: isSelected ? AdminTheme.primary : AdminTheme.background,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -453,7 +526,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Right Content Panel ────────────────────────────────────────────────────
+  // ── Right Settings Options Content Panel ───────────────────────────────────
   Widget _buildSettingsContentPanel(SettingsProvider provider) {
     final catInfo = _categories.firstWhere((c) => c['key'] == _selectedCategory, orElse: () => _categories[0]);
     final List<SystemSetting> settingsList = provider.groupedSettings[_selectedCategory] ?? [];
@@ -498,19 +571,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               SizedBox(
-                width: 240,
+                width: 250,
                 height: 40,
                 child: TextField(
                   controller: _searchController,
                   onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
                   style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Search parameters...',
+                    hintText: 'Search domain options...',
                     hintStyle: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12),
                     prefixIcon: const Icon(Icons.search, size: 18, color: AdminTheme.textSecondary),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                     filled: true,
-                    fillColor: AdminTheme.surface,
+                    fillColor: AdminTheme.background,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AdminTheme.border)),
                   ),
                 ),
@@ -530,7 +603,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.search_off_rounded, size: 40, color: AdminTheme.textSecondary),
+                const Icon(Icons.search_off_rounded, size: 40, color: AdminTheme.textMuted),
                 const SizedBox(height: 12),
                 Text(
                   _searchQuery.isNotEmpty ? 'No options match "$_searchQuery"' : 'No parameters configured in this category yet.',
@@ -554,7 +627,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Option Card Component (DASHMIN Card Layout) ───────────────────────────
+  // ── Option Card Component ─────────────────────────────────────────────────
   Widget _buildSettingOptionCard(SystemSetting setting) {
     final meta = _settingMeta[setting.key];
     final String neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -575,47 +648,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left Icon
+          // Left Icon Container
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AdminTheme.primary.withOpacity(0.12),
+              color: AdminTheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AdminTheme.primary, size: 22),
           ),
           const SizedBox(width: 16),
 
-          // Title & Description & Value
+          // Title, Description & Display Value
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      neatTitle,
-                      style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 10),
-                    // Dashmin-style Role & Privilege Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: setting.requiresSuperAdmin ? Colors.purple.withOpacity(0.2) : AdminTheme.secondary.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: setting.requiresSuperAdmin ? Colors.purple.withOpacity(0.4) : AdminTheme.secondary.withOpacity(0.3)),
-                      ),
-                      child: Text(
-                        setting.requiresSuperAdmin ? 'Super Admin' : 'Admin',
-                        style: TextStyle(
-                          color: setting.requiresSuperAdmin ? Colors.purpleAccent : AdminTheme.secondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  neatTitle,
+                  style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(neatDesc, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12)),
@@ -628,7 +679,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AdminTheme.surface,
+                          color: AdminTheme.background,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: AdminTheme.border),
                         ),
@@ -648,15 +699,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Right Controls (100% Working Switches & Buttons)
+          // Right Controls (Interactive Switch for Booleans / Edit & History for Text)
           if (isBoolValue)
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: boolVal ? AdminTheme.success.withOpacity(0.15) : AdminTheme.danger.withOpacity(0.15),
+                    color: boolVal ? AdminTheme.success.withOpacity(0.12) : AdminTheme.danger.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -667,7 +718,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(width: 8),
                 Switch(
                   value: boolVal,
-                  activeColor: AdminTheme.success,
+                  activeColor: AdminTheme.primary,
                   onChanged: (newVal) => _quickToggleBoolean(setting, newVal),
                 ),
                 IconButton(
@@ -689,14 +740,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(width: 6),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AdminTheme.surface,
-                    foregroundColor: AdminTheme.textPrimary,
-                    side: const BorderSide(color: AdminTheme.border),
+                    backgroundColor: AdminTheme.primary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   ),
-                  icon: const Icon(Icons.edit_outlined, size: 16, color: AdminTheme.primary),
-                  label: const Text('Configure', style: TextStyle(fontSize: 13)),
+                  icon: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+                  label: const Text('Configure', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                   onPressed: () => _showUpdateDialog(setting),
                 ),
               ],
@@ -706,7 +756,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Boolean Switch Quick Toggle (100% Working Live Update) ─────────────────
+  // ── Live Switch Quick Toggle ────────────────────────────────────────────────
   Future<void> _quickToggleBoolean(SystemSetting setting, bool newVal) async {
     final meta = _settingMeta[setting.key];
     final neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -731,14 +781,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('❌ Error updating $neatTitle: ${provider.error ?? "Access denied"}'),
+          content: Text('❌ Error updating $neatTitle: ${provider.error ?? "Failed to save"}'),
           backgroundColor: AdminTheme.danger,
         ),
       );
     }
   }
 
-  // ── Edit Parameter Modal ───────────────────────────────────────────────────
+  // ── Formatted Update Dialog Modal ──────────────────────────────────────────
   void _showUpdateDialog(SystemSetting setting) {
     final meta = _settingMeta[setting.key];
     final neatTitle = meta?['name'] ?? _formatKeyName(setting.key);
@@ -762,7 +812,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   const Icon(Icons.tune_rounded, color: AdminTheme.primary),
                   const SizedBox(width: 10),
-                  Text('Configure $neatTitle', style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 18)),
+                  Text('Configure $neatTitle', style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
                 ],
               ),
               content: SizedBox(
@@ -780,7 +830,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         labelText: 'Setting Parameter Value',
                         labelStyle: const TextStyle(color: AdminTheme.textSecondary),
                         filled: true,
-                        fillColor: AdminTheme.surface,
+                        fillColor: AdminTheme.background,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AdminTheme.border)),
                       ),
                       maxLines: setting.isSensitive ? 1 : 2,
@@ -791,10 +841,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       controller: reasonController,
                       style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 14),
                       decoration: InputDecoration(
-                        labelText: 'Audit Reason (Required for security logs)',
+                        labelText: 'Audit Reason (Required for security log)',
                         labelStyle: const TextStyle(color: AdminTheme.textSecondary),
                         filled: true,
-                        fillColor: AdminTheme.surface,
+                        fillColor: AdminTheme.background,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AdminTheme.border)),
                       ),
                     ),
@@ -846,11 +896,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           if (success) {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('✅ Setting updated successfully.')),
+                              const SnackBar(content: Text('✅ Setting parameter updated successfully.')),
                             );
                           } else {
                             ScaffoldMessenger.of(ctx).showSnackBar(
-                              SnackBar(content: Text('❌ Error: ${provider.error ?? "Failed to update"}')),
+                              SnackBar(content: Text('❌ Error: ${provider.error ?? "Failed to save"}')),
                             );
                           }
                         },
@@ -891,7 +941,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         const Icon(Icons.history_rounded, color: AdminTheme.primary),
                         const SizedBox(width: 10),
-                        Text('Audit History: $neatTitle', style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('Audit Timeline: $neatTitle', style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     IconButton(
@@ -927,7 +977,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           return Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AdminTheme.surface,
+                              color: AdminTheme.background,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AdminTheme.border),
                             ),
@@ -975,7 +1025,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Utility Formatting Helpers ─────────────────────────────────────────────
+  // ── Formatting Helpers ────────────────────────────────────────────────────
   String _formatKeyName(String key) {
     return key
         .replaceAll('_', ' ')
