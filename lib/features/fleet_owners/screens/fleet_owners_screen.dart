@@ -135,14 +135,19 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                     children: [
                       _buildDetailRow('Account Status', user['account_status'] ?? 'Active', color: _getStatusColor(user['account_status'])),
                       _buildDetailRow('Email', user['email'] ?? 'N/A'),
-                      _buildDetailRow('Phone', user['phone'] ?? 'N/A'),
+                      _buildDetailRow('Phone', (user['phone'] != null && user['phone'].toString().isNotEmpty) ? user['phone'].toString() : (org['contact_number'] ?? 'N/A')),
                       _buildDetailRow('Created Date', user['created_at'] != null ? user['created_at'].toString().split('T')[0] : 'N/A'),
                       const Divider(),
                       const Text('Organization Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AdminTheme.textPrimary)),
                       _buildDetailRow('Company Name', org['company_name'] ?? 'N/A'),
                       _buildDetailRow('Organization Status', org['status'] ?? 'N/A', color: _getStatusColor(org['status'])),
+                      _buildDetailRow('Contact Phone', org['contact_number'] ?? 'N/A'),
+                      _buildDetailRow('GSTIN', org['gstin'] ?? 'N/A'),
+                      _buildDetailRow('PAN', org['pan'] ?? 'N/A'),
                       _buildDetailRow('City', org['city'] ?? 'N/A'),
+                      _buildDetailRow('State', org['state'] ?? 'N/A'),
                       _buildDetailRow('Fleet Size', org['fleet_size'] ?? 'N/A'),
+                      _buildDetailRow('Industry', org['industry_type'] ?? 'N/A'),
                       const Divider(),
                       const Text('Platform Statistics', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AdminTheme.textPrimary)),
                       _buildDetailRow('Total Vehicles', vehicles['total']?.toString() ?? '0'),
@@ -173,7 +178,7 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
     final org = details['org'] ?? {};
     
     final nameCtrl = TextEditingController(text: user['full_name']);
-    final phoneText = user['phone'] != null && user['phone'].toString().isNotEmpty ? user['phone'] : '+91 ';
+    final phoneText = user['phone'] != null && user['phone'].toString().isNotEmpty ? user['phone'] : (org['contact_number'] ?? '+91 ');
     final phoneCtrl = TextEditingController(text: phoneText);
     final emailCtrl = TextEditingController(text: user['email']);
     final companyCtrl = TextEditingController(text: org['company_name']);
@@ -203,11 +208,11 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                       TextField(controller: companyCtrl, decoration: const InputDecoration(labelText: 'Company Name'), style: const TextStyle(color: AdminTheme.textPrimary)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: statusVal,
+                        value: ['Active', 'Suspended', 'Inactive', 'Deleted'].contains(statusVal) ? statusVal : 'Active',
                         dropdownColor: AdminTheme.surface,
                         style: const TextStyle(color: AdminTheme.textPrimary),
                         decoration: const InputDecoration(labelText: 'Account Status'),
-                        items: ['Active', 'Suspended', 'Inactive'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                        items: ['Active', 'Suspended', 'Inactive', 'Deleted'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                         onChanged: (v) => setStateSB(() => statusVal = v!),
                       ),
                     ],
@@ -218,7 +223,7 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                 TextButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), child: const Text('Cancel')),
                 ElevatedButton(
                   onPressed: () async {
-                    if (!RegExp(r'^\+91 [6-9]\d{9}$').hasMatch(phoneCtrl.text)) {
+                    if (phoneCtrl.text.isNotEmpty && !RegExp(r'^\+91 [6-9]\d{9}$').hasMatch(phoneCtrl.text)) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phone must be +91 followed by 10 digits starting with 6-9'), backgroundColor: Colors.red));
                       return;
                     }
@@ -286,7 +291,7 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
         content: const Text('Are you sure you want to soft delete this fleet owner?', style: TextStyle(color: AdminTheme.textSecondary)),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true), style: ElevatedButton.styleFrom(backgroundColor: Colors.red), child: const Text('Delete')),
+          ElevatedButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true), style: ElevatedButton.styleFrom(backgroundColor: Colors.red), child: const Text('Soft Delete')),
         ],
       )
     );
@@ -295,7 +300,42 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
       try {
         await _service.deleteFleetOwner(uid);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Deleted successfully')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status set to Deleted successfully')));
+          _fetchData();
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  void _deleteFleetOwnerPermanent(String uid) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AdminTheme.surface,
+        title: const Text('Permanently Delete Fleet Owner', style: TextStyle(color: Colors.red)),
+        content: const Text(
+          'Are you sure you want to PERMANENTLY delete this fleet owner and all associated data? This action CANNOT be undone.',
+          style: TextStyle(color: AdminTheme.textSecondary)
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      )
+    );
+    
+    if (confirm == true) {
+      try {
+        await _service.deleteFleetOwnerPermanent(uid);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permanently deleted successfully')));
           _fetchData();
         }
       } catch (e) {
@@ -461,23 +501,24 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             IconButton(icon: const Icon(Icons.visibility, color: Colors.blue), tooltip: 'View Details', onPressed: () => _showDetails(uid)),
-                                            if (status != 'Deleted')
-                                              PopupMenuButton<String>(
-                                                icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
-                                                color: AdminTheme.surface,
-                                                onSelected: (value) {
-                                                  if (value == 'suspend') _updateStatusAction(uid, 'Suspended');
-                                                  else if (value == 'activate') _updateStatusAction(uid, 'Active');
-                                                  else if (value == 'reset') _resetPassword(uid);
-                                                  else if (value == 'delete') _deleteFleetOwner(uid);
-                                                },
-                                                itemBuilder: (context) => [
-                                                  if (status == 'Active') const PopupMenuItem(value: 'suspend', child: Text('Suspend Account', style: TextStyle(color: Colors.orange))),
-                                                  if (status == 'Suspended') const PopupMenuItem(value: 'activate', child: Text('Activate Account', style: TextStyle(color: Colors.green))),
-                                                  const PopupMenuItem(value: 'reset', child: Text('Reset Password', style: TextStyle(color: AdminTheme.textPrimary))),
-                                                  const PopupMenuItem(value: 'delete', child: Text('Delete Account', style: TextStyle(color: Colors.red))),
-                                                ],
-                                              ),
+                                            PopupMenuButton<String>(
+                                              icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
+                                              color: AdminTheme.surface,
+                                              onSelected: (value) {
+                                                if (value == 'suspend') _updateStatusAction(uid, 'Suspended');
+                                                else if (value == 'activate') _updateStatusAction(uid, 'Active');
+                                                else if (value == 'reset') _resetPassword(uid);
+                                                else if (value == 'delete') _deleteFleetOwner(uid);
+                                                else if (value == 'permanent_delete') _deleteFleetOwnerPermanent(uid);
+                                              },
+                                              itemBuilder: (context) => [
+                                                if (status == 'Active') const PopupMenuItem(value: 'suspend', child: Text('Suspend Account', style: TextStyle(color: Colors.orange))),
+                                                if (status == 'Suspended' || status == 'Deleted') const PopupMenuItem(value: 'activate', child: Text('Activate Account', style: TextStyle(color: Colors.green))),
+                                                const PopupMenuItem(value: 'reset', child: Text('Reset Password', style: TextStyle(color: AdminTheme.textPrimary))),
+                                                if (status != 'Deleted') const PopupMenuItem(value: 'delete', child: Text('Soft Delete Account', style: TextStyle(color: Colors.orange))),
+                                                const PopupMenuItem(value: 'permanent_delete', child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+                                              ],
+                                            ),
                                           ],
                                         )),
                                       ]);

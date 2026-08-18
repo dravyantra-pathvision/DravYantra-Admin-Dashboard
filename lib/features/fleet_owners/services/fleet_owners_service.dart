@@ -88,6 +88,18 @@ class FleetOwnersService {
     }
   }
 
+  Future<void> deleteFleetOwnerPermanent(String uid) async {
+    final headers = await _getHeaders();
+    final response = await http.delete(
+      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid/permanent'),
+      headers: headers,
+    );
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to permanently delete fleet owner');
+    }
+  }
+
   Future<String?> resetPassword(String uid) async {
     final headers = await _getHeaders();
     final response = await http.post(

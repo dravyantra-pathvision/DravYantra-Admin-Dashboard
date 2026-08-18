@@ -16,7 +16,7 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
   late OrganizationsService _service;
   bool _isLoading = true;
   List<dynamic> _organizations = [];
-  String _filterStatus = 'Pending Review';
+  String _filterStatus = 'All';
   String _searchQuery = '';
   Timer? _debounce;
 
@@ -66,12 +66,15 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Approved':
+      case 'Active':
         return Colors.green;
       case 'Pending Review':
         return Colors.orange;
       case 'Rejected':
+      case 'Deleted':
         return Colors.red;
       case 'Suspended':
+      case 'Inactive':
         return Colors.grey;
       default:
         return Colors.blue;
@@ -120,13 +123,16 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildDetailRow('Status', currentStatus, color: _getStatusColor(currentStatus)),
+                  _buildDetailRow('Org Status', currentStatus, color: _getStatusColor(currentStatus)),
+                  _buildDetailRow('Account Status', userData['account_status'] ?? 'Active', color: _getStatusColor(userData['account_status'] ?? 'Active')),
                   const Divider(),
-                  _buildDetailRow('Fleet Owner Email', userData['email'] ?? 'N/A'),
                   _buildDetailRow('Fleet Owner Name', userData['full_name'] ?? 'N/A'),
+                  _buildDetailRow('Fleet Owner Email', userData['email'] ?? 'N/A'),
+                  _buildDetailRow('Phone', (userData['phone'] != null && userData['phone'].toString().isNotEmpty) ? userData['phone'].toString() : (orgData['contact_number'] ?? 'N/A')),
                   const SizedBox(height: 16),
                   const Text('Company Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AdminTheme.textPrimary)),
-                  _buildDetailRow('Contact Number', orgData['contact_number'] ?? 'N/A'),
+                  _buildDetailRow('Company Name', orgData['company_name'] ?? 'N/A'),
+                  _buildDetailRow('Contact Phone', orgData['contact_number'] ?? 'N/A'),
                   _buildDetailRow('City', orgData['city'] ?? 'N/A'),
                   _buildDetailRow('State', orgData['state'] ?? 'N/A'),
                   _buildDetailRow('PAN', orgData['pan'] ?? 'N/A'),
@@ -322,18 +328,25 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                                       DataColumn(label: Text('Company Name')),
                                       DataColumn(label: Text('Fleet Owner Name')),
                                       DataColumn(label: Text('Fleet Owner Email')),
-                                      DataColumn(label: Text('Status')),
+                                      DataColumn(label: Text('Contact Phone')),
+                                      DataColumn(label: Text('Account Status')),
+                                      DataColumn(label: Text('Org Status')),
                                       DataColumn(label: Text('City')),
                                       DataColumn(label: Text('Joined At')),
                                     ],
                                     rows: _organizations.map((org) {
                                       final status = org['status'] ?? 'Unknown';
+                                      final accStatus = org['account_status'] ?? 'Active';
+                                      final phone = (org['phone'] != null && org['phone'].toString().isNotEmpty) ? org['phone'].toString() : (org['contact_number'] ?? 'N/A');
+                                      
                                       return DataRow(
                                         onSelectChanged: (_) => _showOrganizationDetails(org),
                                         cells: [
                                           DataCell(Text(org['company_name'] ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.w600))),
                                           DataCell(Text(org['full_name'] ?? 'N/A')),
                                           DataCell(Text(org['email'] ?? 'N/A')),
+                                          DataCell(Text(phone)),
+                                          DataCell(Text(accStatus, style: TextStyle(color: _getStatusColor(accStatus), fontWeight: FontWeight.bold))),
                                           DataCell(
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
