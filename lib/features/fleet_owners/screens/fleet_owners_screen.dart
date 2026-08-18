@@ -301,7 +301,13 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
         await _service.deleteFleetOwner(uid);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status set to Deleted successfully')));
-          _fetchData();
+          setState(() {
+            for (var owner in _fleetOwners) {
+              if (owner['uid']?.toString() == uid) {
+                owner['account_status'] = 'Deleted';
+              }
+            }
+          });
         }
       } catch (e) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -337,9 +343,8 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permanently deleted successfully')));
           setState(() {
-            _fleetOwners.removeWhere((item) => item['uid'] == uid);
+            _fleetOwners.removeWhere((item) => item['uid']?.toString() == uid);
           });
-          _fetchData();
         }
       } catch (e) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
