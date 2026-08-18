@@ -16,7 +16,7 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
   late OrganizationsService _service;
   bool _isLoading = true;
   List<dynamic> _organizations = [];
-  String _filterStatus = 'All';
+  String _filterStatus = 'Pending Review';
   String _searchQuery = '';
   Timer? _debounce;
 
