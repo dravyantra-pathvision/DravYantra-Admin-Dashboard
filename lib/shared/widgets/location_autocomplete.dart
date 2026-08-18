@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/location_search_service.dart';
 import '../../app/theme.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 class LocationAutocomplete extends StatefulWidget {
   final String? initialValue;
@@ -81,7 +80,7 @@ class _LocationAutocompleteState extends State<LocationAutocomplete> {
             border: const OutlineInputBorder(),
             suffixIcon: _isLoading 
                 ? const SizedBox(width: 16, height: 16, child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2)))
-                : const Icon(LucideIcons.search, size: 20),
+                : const Icon(Icons.search, size: 20),
           ),
         );
       },
@@ -105,7 +104,7 @@ class _LocationAutocompleteState extends State<LocationAutocomplete> {
                   final subtitle = parts.length > 1 ? parts.skip(1).join(',').trim() : '';
                   
                   return ListTile(
-                    leading: const Icon(LucideIcons.mapPin, color: AdminTheme.primary),
+                    leading: const Icon(Icons.location_on, color: AdminTheme.primary),
                     title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: subtitle.isNotEmpty ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)) : null,
                     onTap: () => onSelected(option),
