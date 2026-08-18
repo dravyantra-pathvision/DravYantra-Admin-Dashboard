@@ -96,7 +96,13 @@ class FleetOwnersService {
     );
     
     if (response.statusCode != 200) {
-      throw Exception('Failed to permanently delete fleet owner');
+      String msg = 'Failed to permanently delete fleet owner';
+      try {
+        final body = jsonDecode(response.body);
+        if (body['message'] != null) msg = body['message'];
+        else if (body['error'] != null) msg = body['error'];
+      } catch (_) {}
+      throw Exception(msg);
     }
   }
 
