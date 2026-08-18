@@ -90,10 +90,20 @@ class FleetOwnersService {
 
   Future<void> deleteFleetOwnerPermanent(String uid) async {
     final headers = await _getHeaders();
-    final response = await http.delete(
+    
+    // 1. Try primary query param endpoint
+    var response = await http.delete(
       Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid?permanent=true'),
       headers: headers,
     );
+
+    // 2. Fallback to subpath endpoint if 404
+    if (response.statusCode == 404) {
+      response = await http.delete(
+        Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid/permanent'),
+        headers: headers,
+      );
+    }
     
     if (response.statusCode != 200) {
       String msg = 'Failed to permanently delete fleet owner';
