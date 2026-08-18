@@ -7,7 +7,7 @@ import '../models/ticket_model.dart';
 import '../../../app/theme.dart';
 
 class SupportDashboardScreen extends StatefulWidget {
-  const SupportDashboardScreen({Key? key}) : super(key: key);
+  const SupportDashboardScreen({super.key});
 
   @override
   State<SupportDashboardScreen> createState() => _SupportDashboardScreenState();
@@ -64,9 +64,13 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
     return Scaffold(
       backgroundColor: AdminTheme.background,
       appBar: AppBar(
-        backgroundColor: AdminTheme.card,
-        title: const Text('Support & Tickets', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        elevation: 0,
+        backgroundColor: AdminTheme.surface,
+        elevation: 1,
+        shadowColor: const Color(0x0F0F172A),
+        title: const Text(
+          'Support & Tickets',
+          style: TextStyle(color: AdminTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+        ),
       ),
       body: Column(
         children: [
@@ -76,12 +80,12 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
           // Filters
           _buildFilters(),
 
-          // Table
+          // Table / Cards list
           Expanded(
             child: provider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : provider.error != null
-                    ? Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)))
+                    ? Center(child: Text(provider.error!, style: const TextStyle(color: AdminTheme.danger)))
                     : provider.tickets.isEmpty
                         ? _buildEmpty()
                         : _buildTicketsTable(provider.tickets),
@@ -101,23 +105,24 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
     ];
 
     return Container(
-      color: AdminTheme.card,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      color: AdminTheme.background,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       child: Row(
         children: items.map((item) => Expanded(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
             decoration: BoxDecoration(
-              color: item.color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: item.color.withOpacity(0.3)),
+              color: AdminTheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: item.color.withOpacity(0.3), width: 1.2),
+              boxShadow: AdminTheme.cardShadow,
             ),
             child: Column(
               children: [
-                Text(item.value, style: TextStyle(color: item.color, fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 2),
-                Text(item.label, style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                Text(item.value, style: TextStyle(color: item.color, fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(item.label, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -127,15 +132,9 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
   }
 
   Widget _buildFilters() {
-    final dropdownStyle = ButtonStyle(
-      backgroundColor: WidgetStateProperty.all(AdminTheme.surface),
-      foregroundColor: WidgetStateProperty.all(Colors.white),
-      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-    );
-
     return Container(
-      color: AdminTheme.card,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      color: AdminTheme.background,
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: Row(
         children: [
           _filterDropdown('Status', _selectedStatus, _statuses, (v) {
@@ -143,13 +142,13 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
             context.read<SupportProvider>().setFilters(
               status: _selectedStatus, priority: _selectedPriority, category: _selectedCategory);
           }),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           _filterDropdown('Priority', _selectedPriority, _priorities, (v) {
             setState(() => _selectedPriority = v ?? '');
             context.read<SupportProvider>().setFilters(
               status: _selectedStatus, priority: _selectedPriority, category: _selectedCategory);
           }),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           _filterDropdown('Category', _selectedCategory, _categories, (v) {
             setState(() => _selectedCategory = v ?? '');
             context.read<SupportProvider>().setFilters(
@@ -163,7 +162,12 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
             },
             icon: const Icon(Icons.refresh, size: 16),
             label: const Text('Reset'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.white70),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AdminTheme.textSecondary,
+              backgroundColor: AdminTheme.surface,
+              side: const BorderSide(color: AdminTheme.border, width: 1.2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
           ),
         ],
       ),
@@ -171,23 +175,33 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
   }
 
   Widget _filterDropdown(String label, String value, List<String> options, ValueChanged<String?> onChanged) {
-    return DropdownButton<String>(
-      value: value,
-      dropdownColor: AdminTheme.card,
-      underline: const SizedBox(),
-      style: const TextStyle(color: Colors.white, fontSize: 13),
-      hint: Text(label, style: const TextStyle(color: Colors.white54, fontSize: 13)),
-      items: options.map((o) => DropdownMenuItem(
-        value: o,
-        child: Text(o.isEmpty ? 'All $label' : o),
-      )).toList(),
-      onChanged: onChanged,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        color: AdminTheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AdminTheme.border, width: 1.2),
+        boxShadow: AdminTheme.cardShadow,
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          dropdownColor: AdminTheme.surface,
+          style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w500),
+          hint: Text(label, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 13)),
+          items: options.map((o) => DropdownMenuItem(
+            value: o,
+            child: Text(o.isEmpty ? 'All $label' : o, style: const TextStyle(color: AdminTheme.textPrimary)),
+          )).toList(),
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 
   Widget _buildTicketsTable(List<SupportTicket> tickets) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         children: tickets.map((ticket) => _buildTicketCard(ticket)).toList(),
       ),
@@ -198,12 +212,13 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
     return GestureDetector(
       onTap: () => context.go('/support/${ticket.ticketNumber}'),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AdminTheme.card,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AdminTheme.border),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AdminTheme.border, width: 1.2),
+          boxShadow: AdminTheme.cardShadow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,43 +226,43 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
             Row(
               children: [
                 Text(ticket.ticketNumber,
-                    style: TextStyle(color: AdminTheme.primary, fontWeight: FontWeight.bold, fontSize: 13)),
-                const SizedBox(width: 8),
+                    style: const TextStyle(color: AdminTheme.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(width: 10),
                 _chip(ticket.status, _statusColor(ticket.status)),
                 const SizedBox(width: 8),
                 _chip(ticket.priority, _priorityColor(ticket.priority)),
                 const Spacer(),
                 Text(
                   DateFormat('dd MMM yyyy').format(ticket.createdAt),
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             Text(ticket.subject,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
-            const SizedBox(height: 4),
+                style: const TextStyle(color: AdminTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 15)),
+            const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.business, size: 13, color: Colors.white54),
+                const Icon(Icons.business, size: 14, color: AdminTheme.textSecondary),
                 const SizedBox(width: 4),
                 Text(ticket.organizationName ?? 'Unknown Org',
-                    style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                    style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
                 const SizedBox(width: 16),
-                Icon(Icons.person, size: 13, color: Colors.white54),
+                const Icon(Icons.person, size: 14, color: AdminTheme.textSecondary),
                 const SizedBox(width: 4),
                 Text(ticket.fleetOwnerName ?? ticket.fleetOwnerEmail ?? 'Unknown',
-                    style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                    style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
                 const SizedBox(width: 16),
-                Icon(Icons.category, size: 13, color: Colors.white54),
+                const Icon(Icons.category, size: 14, color: AdminTheme.textSecondary),
                 const SizedBox(width: 4),
-                Text(ticket.category, style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                Text(ticket.category, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
                 if (ticket.assignedStaffName != null) ...[
                   const SizedBox(width: 16),
-                  Icon(Icons.support_agent, size: 13, color: AdminTheme.success.withOpacity(0.8)),
+                  Icon(Icons.support_agent, size: 14, color: AdminTheme.success),
                   const SizedBox(width: 4),
                   Text(ticket.assignedStaffName!,
-                      style: TextStyle(color: AdminTheme.success.withOpacity(0.8), fontSize: 12)),
+                      style: const TextStyle(color: AdminTheme.success, fontSize: 12, fontWeight: FontWeight.w600)),
                 ]
               ],
             ),
@@ -259,13 +274,13 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
 
   Widget _chip(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
     );
   }
 
@@ -273,11 +288,11 @@ class _SupportDashboardScreenState extends State<SupportDashboardScreen> {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: const [
           Icon(Icons.support_agent, size: 64, color: AdminTheme.textMuted),
-          const SizedBox(height: 16),
-          Text('No support tickets', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 16)),
-          const SizedBox(height: 8),
+          SizedBox(height: 16),
+          Text('No support tickets', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 16, fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
           Text('All tickets will appear here', style: TextStyle(color: AdminTheme.textMuted, fontSize: 13)),
         ],
       ),
