@@ -336,6 +336,9 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
         await _service.deleteFleetOwnerPermanent(uid);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permanently deleted successfully')));
+          setState(() {
+            _fleetOwners.removeWhere((item) => item['uid'] == uid);
+          });
           _fetchData();
         }
       } catch (e) {
