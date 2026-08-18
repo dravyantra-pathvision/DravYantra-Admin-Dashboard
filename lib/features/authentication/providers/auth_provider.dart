@@ -16,6 +16,21 @@ class AuthProvider extends ChangeNotifier {
   String?    get error => _error;
   bool get isAuthenticated => _state == AuthState.authenticated && _user != null;
 
+  bool _isOfflineMode = false;
+  bool get isOfflineMode => _isOfflineMode;
+
+  void enterOfflineMode() {
+    _user = const AdminUser(
+      uid: 'offline-admin-uid',
+      email: 'admin@dravyantra.com',
+      fullName: 'Offline Admin',
+      role: 'admin',
+    );
+    _isOfflineMode = true;
+    _state = AuthState.authenticated;
+    notifyListeners();
+  }
+
   // ── Init — called from router redirect ─────────────────────────────────────
 
   Future<void> initialize() async {

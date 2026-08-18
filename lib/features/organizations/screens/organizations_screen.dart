@@ -314,8 +314,10 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                       : Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            border: Border.all(color: AdminTheme.border),
+                            color: AdminTheme.surface,
+                            border: Border.all(color: AdminTheme.border, width: 1.2),
                             borderRadius: BorderRadius.circular(12),
+                            boxShadow: AdminTheme.cardShadow,
                           ),
                           child: LayoutBuilder(
                             builder: (context, constraints) {

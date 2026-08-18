@@ -479,7 +479,12 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                       : SingleChildScrollView(
                           child: Container(
                             width: double.infinity,
-                            decoration: BoxDecoration(color: AdminTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AdminTheme.border)),
+                            decoration: BoxDecoration(
+                              color: AdminTheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AdminTheme.border, width: 1.2),
+                              boxShadow: AdminTheme.cardShadow,
+                            ),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
                                 return SingleChildScrollView(

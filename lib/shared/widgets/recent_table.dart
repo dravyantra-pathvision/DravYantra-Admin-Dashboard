@@ -23,7 +23,8 @@ class RecentTable<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: AdminTheme.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AdminTheme.border),
+        border: Border.all(color: AdminTheme.border, width: 1.2),
+        boxShadow: AdminTheme.cardShadow,
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
