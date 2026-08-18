@@ -4,7 +4,7 @@ frontend:
     preBuild:
       commands:
         - rm -rf flutter
-        - git clone https://github.com/flutter/flutter.git -b 3.22.0
+        - git clone https://github.com/flutter/flutter.git -b 3.22.0 --depth 1
         - export PATH="$PATH:$PWD/flutter/bin"
         - flutter config --enable-web
     build:
