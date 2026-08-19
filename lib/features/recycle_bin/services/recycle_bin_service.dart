@@ -39,12 +39,22 @@ class RecycleBinService {
   }
 
   Future<void> hardDeleteItem(String entityType, String id) async {
-    await _api.post(
-      '${ApiEndpoints.base}/api/admin/recycle-bin/permanent',
-      {
-        'entity_type': entityType,
-        'id': id,
-      },
-    );
+    try {
+      await _api.post(
+        '${ApiEndpoints.base}/api/admin/recycle-bin/permanent',
+        {
+          'entity_type': entityType,
+          'id': id,
+        },
+      );
+    } catch (e) {
+      await _api.delete(
+        '${ApiEndpoints.base}/api/admin/recycle-bin/permanent',
+        body: {
+          'entity_type': entityType,
+          'id': id,
+        },
+      );
+    }
   }
 }
