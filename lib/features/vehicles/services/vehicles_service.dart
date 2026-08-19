@@ -75,6 +75,10 @@ class VehiclesService {
     );
   }
 
+  Future<void> deleteVehicle(String plate) async {
+    await _api.delete('${ApiEndpoints.base}/api/admin/vehicles/$plate');
+  }
+
   Future<void> deleteVehiclePermanent(String plate) async {
     // 1. Try primary query param endpoint
     try {

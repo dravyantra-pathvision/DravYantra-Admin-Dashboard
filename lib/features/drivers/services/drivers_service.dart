@@ -52,6 +52,10 @@ class DriversService {
     return decoded as List<dynamic>;
   }
 
+  static Future<void> deleteDriver(String id) async {
+    await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$id');
+  }
+
   static Future<void> deleteDriverPermanent(String id) async {
     // 1. Try primary query param endpoint
     try {

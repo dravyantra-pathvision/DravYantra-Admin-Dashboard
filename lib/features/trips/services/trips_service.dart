@@ -69,6 +69,10 @@ class TripsService {
     return await _apiClient.downloadFile('${ApiEndpoints.base}/api/admin/trips/export', queryParams: queryParams);
   }
 
+  Future<void> deleteTrip(String id) async {
+    await _apiClient.delete('${ApiEndpoints.base}/api/admin/trips/$id');
+  }
+
   Future<void> deleteTripPermanent(String id) async {
     // 1. Try primary query param endpoint
     try {

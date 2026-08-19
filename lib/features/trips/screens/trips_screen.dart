@@ -76,23 +76,23 @@ class _TripsScreenState extends State<TripsScreen> {
     }
   }
 
-  void _deleteTripPermanent(String id) async {
+  void _deleteTrip(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
       useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: AdminTheme.surface,
-        title: const Text('Permanently Delete Trip', style: TextStyle(color: Colors.red)),
+        title: const Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
         content: const Text(
-          'Are you sure you want to PERMANENTLY delete this trip and all associated data? This action CANNOT be undone.',
+          'Are you sure you want to move this trip to the Recycle Bin? You can restore it anytime from Settings -> Recycle Bin.',
           style: TextStyle(color: AdminTheme.textSecondary),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete Permanently'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Move to Recycle Bin'),
           ),
         ],
       ),
@@ -100,9 +100,9 @@ class _TripsScreenState extends State<TripsScreen> {
 
     if (confirm == true) {
       try {
-        await _tripsService.deleteTripPermanent(id);
+        await _tripsService.deleteTrip(id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trip permanently deleted successfully')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trip moved to Recycle Bin')));
           context.read<TripsProvider>().fetchTrips(refresh: true);
         }
       } catch (e) {
@@ -259,12 +259,18 @@ class _TripsScreenState extends State<TripsScreen> {
                                           icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
                                           color: AdminTheme.surface,
                                           onSelected: (value) {
-                                            if (value == 'permanent_delete') _deleteTripPermanent(trip.id);
+                                            if (value == 'delete') _deleteTrip(trip.id);
                                           },
                                           itemBuilder: (context) => [
                                             const PopupMenuItem(
-                                              value: 'permanent_delete',
-                                              child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                              value: 'delete',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.delete_outline, color: Colors.orange, size: 18),
+                                                  SizedBox(width: 8),
+                                                  Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),

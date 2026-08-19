@@ -193,12 +193,18 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                         icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
                                         color: AdminTheme.surface,
                                         onSelected: (value) {
-                                          if (value == 'permanent_delete') _deleteVehiclePermanent(vehicle.plate);
+                                          if (value == 'delete') _deleteVehicle(vehicle.plate);
                                         },
                                         itemBuilder: (context) => [
                                           const PopupMenuItem(
-                                            value: 'permanent_delete',
-                                            child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.delete_outline, color: Colors.orange, size: 18),
+                                                SizedBox(width: 8),
+                                                Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -258,23 +264,23 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     return false;
   }
 
-  void _deleteVehiclePermanent(String plate) async {
+  void _deleteVehicle(String plate) async {
     final confirm = await showDialog<bool>(
       context: context,
       useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: AdminTheme.surface,
-        title: const Text('Permanently Delete Vehicle', style: TextStyle(color: Colors.red)),
+        title: const Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
         content: const Text(
-          'Are you sure you want to PERMANENTLY delete this vehicle and all associated data? This action CANNOT be undone.',
+          'Are you sure you want to move this vehicle to the Recycle Bin? You can restore it anytime from Settings -> Recycle Bin.',
           style: TextStyle(color: AdminTheme.textSecondary),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete Permanently'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Move to Recycle Bin'),
           ),
         ],
       ),
@@ -282,9 +288,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
     if (confirm == true) {
       try {
-        await _service.deleteVehiclePermanent(plate);
+        await _service.deleteVehicle(plate);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vehicle permanently deleted successfully')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vehicle moved to Recycle Bin')));
           context.read<VehiclesProvider>().loadVehicles(resetPage: true);
         }
       } catch (e) {

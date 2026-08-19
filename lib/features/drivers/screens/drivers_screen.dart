@@ -42,23 +42,23 @@ class _DriversScreenState extends State<DriversScreen> {
     }
   }
 
-  void _deleteDriverPermanent(String id) async {
+  void _deleteDriver(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
       useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: AdminTheme.surface,
-        title: const Text('Permanently Delete Driver', style: TextStyle(color: Colors.red)),
+        title: const Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
         content: const Text(
-          'Are you sure you want to PERMANENTLY delete this driver and all associated data? This action CANNOT be undone.',
+          'Are you sure you want to move this driver to the Recycle Bin? You can restore it anytime from Settings -> Recycle Bin.',
           style: TextStyle(color: AdminTheme.textSecondary),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete Permanently'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Move to Recycle Bin'),
           ),
         ],
       ),
@@ -66,9 +66,9 @@ class _DriversScreenState extends State<DriversScreen> {
 
     if (confirm == true) {
       try {
-        await DriversService.deleteDriverPermanent(id);
+        await DriversService.deleteDriver(id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver permanently deleted successfully')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver moved to Recycle Bin')));
           context.read<DriversProvider>().fetchDrivers(resetPage: true);
         }
       } catch (e) {
@@ -243,18 +243,24 @@ class _DriversScreenState extends State<DriversScreen> {
                                           },
                                         ),
                                         PopupMenuButton<String>(
-                                          icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
-                                          color: AdminTheme.surface,
-                                          onSelected: (value) {
-                                            if (value == 'permanent_delete') _deleteDriverPermanent(driver.id);
-                                          },
-                                          itemBuilder: (context) => [
-                                            const PopupMenuItem(
-                                              value: 'permanent_delete',
-                                              child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                            ),
-                                          ],
-                                        ),
+                                           icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
+                                           color: AdminTheme.surface,
+                                           onSelected: (value) {
+                                             if (value == 'delete') _deleteDriver(driver.id);
+                                           },
+                                           itemBuilder: (context) => [
+                                             const PopupMenuItem(
+                                               value: 'delete',
+                                               child: Row(
+                                                 children: [
+                                                   Icon(Icons.delete_outline, color: Colors.orange, size: 18),
+                                                   SizedBox(width: 8),
+                                                   Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                                 ],
+                                               ),
+                                             ),
+                                           ],
+                                         ),
                                       ],
                                     ),
                                   ),

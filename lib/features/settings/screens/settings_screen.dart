@@ -6,6 +6,9 @@ import '../settings_provider.dart';
 import '../models/system_settings_model.dart';
 import '../../../app/theme.dart';
 
+import '../../recycle_bin/providers/recycle_bin_provider.dart';
+import '../../recycle_bin/models/recycled_item.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -137,6 +140,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'label': 'Alerts & Integrations',
       'icon': Icons.notifications_active_rounded,
       'desc': 'WhatsApp gateway toggle, GIS maps engine, AWS S3 bucket & maintenance switch',
+    },
+    {
+      'key': 'recycle_bin',
+      'label': 'Recycle Bin & Data Recovery',
+      'icon': Icons.delete_sweep_rounded,
+      'desc': 'Inspect deleted items, restore items to active screens, or permanently purge',
     },
   ];
 
@@ -372,6 +381,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ── Right Settings Options Content Panel ───────────────────────────────────
   Widget _buildSettingsContentPanel(SettingsProvider provider) {
+    if (_selectedCategory == 'recycle_bin') {
+      return _buildRecycleBinView();
+    }
+
     final catInfo = _categories.firstWhere((c) => c['key'] == _selectedCategory, orElse: () => _categories[0]);
     final List<SystemSetting> settingsList = provider.groupedSettings[_selectedCategory] ?? [];
 
@@ -885,5 +898,262 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return jsonEncode(val);
     }
     return val.toString();
+  }
+
+  // ── Recycle Bin View ────────────────────────────────────────────────────────
+  Widget _buildRecycleBinView() {
+    return Consumer<RecycleBinProvider>(
+      builder: (context, binProvider, _) {
+        final items = binProvider.items;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Bar
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AdminTheme.card,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AdminTheme.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.delete_sweep_rounded, color: Colors.orange, size: 24),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Recycle Bin & Data Recovery',
+                          style: TextStyle(color: AdminTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () => binProvider.fetchItems(resetPage: true),
+                        icon: const Icon(Icons.refresh, size: 16),
+                        label: const Text('Refresh'),
+                        style: ElevatedButton.styleFrom(backgroundColor: AdminTheme.primary, foregroundColor: Colors.white),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Items moved to Recycle Bin can be safely restored to their original screens or permanently deleted from the database.',
+                    style: TextStyle(color: AdminTheme.textSecondary, fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Search Bar
+                  TextField(
+                    onChanged: (val) => binProvider.setSearchQuery(val),
+                    decoration: InputDecoration(
+                      hintText: 'Search recycled items by name, email, or ID...',
+                      prefixIcon: const Icon(Icons.search, color: AdminTheme.textSecondary),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      filled: true,
+                      fillColor: AdminTheme.background,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Category Filter Pills
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildTypeFilterPill(binProvider, 'all', 'All Items'),
+                  _buildTypeFilterPill(binProvider, 'fleet_owner', 'Fleet Owners'),
+                  _buildTypeFilterPill(binProvider, 'organization', 'Organizations'),
+                  _buildTypeFilterPill(binProvider, 'vehicle', 'Vehicles'),
+                  _buildTypeFilterPill(binProvider, 'driver', 'Drivers'),
+                  _buildTypeFilterPill(binProvider, 'trip', 'Trips'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Recycle Bin Table
+            Container(
+              decoration: BoxDecoration(
+                color: AdminTheme.card,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AdminTheme.border),
+              ),
+              child: binProvider.isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(40.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : items.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.all(40.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Icon(Icons.delete_outline_rounded, size: 48, color: AdminTheme.textSecondary),
+                                SizedBox(height: 12),
+                                Text('Recycle Bin is Empty', style: TextStyle(color: AdminTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                                SizedBox(height: 4),
+                                Text('No deleted items found matching the selected category.', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AdminTheme.background),
+                            columns: const [
+                              DataColumn(label: Text('ITEM NAME / ID', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('CATEGORY', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('DETAILS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('DELETED DATE', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('ACTIONS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                            ],
+                            rows: items.map((item) {
+                              final dateStr = DateFormat('yyyy-MM-dd HH:mm').format(item.deletedAt);
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    Text(item.title, style: const TextStyle(color: AdminTheme.textPrimary, fontWeight: FontWeight.bold)),
+                                  ),
+                                  DataCell(_buildCategoryBadge(item.entityTypeLabel)),
+                                  DataCell(
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(item.subtitle, style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 13)),
+                                        if (item.organization.isNotEmpty && item.organization != 'N/A')
+                                          Text(item.organization, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 11)),
+                                      ],
+                                    ),
+                                  ),
+                                  DataCell(Text(dateStr, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 13))),
+                                  DataCell(
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Restore Button
+                                        ElevatedButton.icon(
+                                          onPressed: () => _restoreRecycledItem(item),
+                                          icon: const Icon(Icons.restore_from_trash_rounded, size: 16),
+                                          label: const Text('Restore'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AdminTheme.success.withOpacity(0.15),
+                                            foregroundColor: AdminTheme.success,
+                                            elevation: 0,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // Delete Permanently Button
+                                        OutlinedButton.icon(
+                                          onPressed: () => _hardDeleteRecycledItem(item),
+                                          icon: const Icon(Icons.delete_forever_rounded, size: 16, color: Colors.red),
+                                          label: const Text('Purge', style: TextStyle(color: Colors.red)),
+                                          style: OutlinedButton.styleFrom(
+                                            side: const BorderSide(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTypeFilterPill(RecycleBinProvider provider, String key, String label) {
+    final isSelected = provider.selectedType == key;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (_) => provider.setTypeFilter(key),
+        selectedColor: AdminTheme.primary,
+        labelStyle: TextStyle(color: isSelected ? Colors.white : AdminTheme.textPrimary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+        backgroundColor: AdminTheme.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isSelected ? AdminTheme.primary : AdminTheme.border)),
+      ),
+    );
+  }
+
+  Widget _buildCategoryBadge(String label) {
+    Color bg = AdminTheme.primary.withOpacity(0.1);
+    Color fg = AdminTheme.primary;
+    if (label.contains('Fleet')) { bg = Colors.purple.withOpacity(0.1); fg = Colors.purple; }
+    else if (label.contains('Org')) { bg = Colors.blue.withOpacity(0.1); fg = Colors.blue; }
+    else if (label.contains('Vehicle')) { bg = Colors.teal.withOpacity(0.1); fg = Colors.teal; }
+    else if (label.contains('Driver')) { bg = Colors.amber.withOpacity(0.15); fg = Colors.amber.shade900; }
+    else if (label.contains('Trip')) { bg = Colors.indigo.withOpacity(0.1); fg = Colors.indigo; }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+      child: Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  void _restoreRecycledItem(RecycledItem item) async {
+    try {
+      await context.read<RecycleBinProvider>().restoreItem(item.entityType, item.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✅ ${item.entityTypeLabel} "${item.title}" restored successfully to original section!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error restoring item: $e')));
+    }
+  }
+
+  void _hardDeleteRecycledItem(RecycledItem item) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AdminTheme.surface,
+        title: const Text('PERMANENTLY DELETE ITEM', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        content: Text(
+          'Are you sure you want to PERMANENTLY delete ${item.entityTypeLabel} "${item.title}" from the cloud database? This action CANNOT be undone.',
+          style: const TextStyle(color: AdminTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await context.read<RecycleBinProvider>().hardDeleteItem(item.entityType, item.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('🗑️ ${item.entityTypeLabel} "${item.title}" permanently deleted from database.')),
+          );
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error purging item: $e')));
+      }
+    }
   }
 }

@@ -16,6 +16,7 @@ import 'features/support/providers/support_provider.dart';
 import 'features/subscriptions/providers/subscriptions_provider.dart';
 import 'features/audit/providers/audit_provider.dart';
 import 'features/profile/providers/profile_provider.dart';
+import 'features/recycle_bin/providers/recycle_bin_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -52,6 +53,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SubscriptionsProvider()),
         ChangeNotifierProvider(create: (_) => AuditProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => RecycleBinProvider()),
       ],
       child: AdminApp(authProvider: authProvider),
     ),

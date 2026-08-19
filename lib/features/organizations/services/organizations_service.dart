@@ -46,6 +46,17 @@ class OrganizationsService {
     }
   }
 
+  Future<void> deleteOrganization(String id) async {
+    final headers = await _getHeaders();
+    final response = await http.delete(
+      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id'),
+      headers: headers,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to move organization to Recycle Bin');
+    }
+  }
+
   Future<void> deleteOrganizationPermanent(String id) async {
     final headers = await _getHeaders();
 

@@ -287,11 +287,18 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
       useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: AdminTheme.surface,
-        title: const Text('Delete Fleet Owner', style: TextStyle(color: AdminTheme.textPrimary)),
-        content: const Text('Are you sure you want to soft delete this fleet owner?', style: TextStyle(color: AdminTheme.textSecondary)),
+        title: const Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+        content: const Text(
+          'Are you sure you want to move this fleet owner to the Recycle Bin? You can restore it anytime from Settings -> Recycle Bin.',
+          style: TextStyle(color: AdminTheme.textSecondary)
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true), style: ElevatedButton.styleFrom(backgroundColor: Colors.red), child: const Text('Soft Delete')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Move to Recycle Bin'),
+          ),
         ],
       )
     );
@@ -300,14 +307,8 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
       try {
         await _service.deleteFleetOwner(uid);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status set to Deleted successfully')));
-          setState(() {
-            for (var owner in _fleetOwners) {
-              if (owner['uid']?.toString() == uid) {
-                owner['account_status'] = 'Deleted';
-              }
-            }
-          });
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fleet Owner moved to Recycle Bin')));
+          _fetchData();
         }
       } catch (e) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -522,14 +523,21 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                                                 else if (value == 'activate') _updateStatusAction(uid, 'Active');
                                                 else if (value == 'reset') _resetPassword(uid);
                                                 else if (value == 'delete') _deleteFleetOwner(uid);
-                                                else if (value == 'permanent_delete') _deleteFleetOwnerPermanent(uid);
                                               },
                                               itemBuilder: (context) => [
                                                 if (status == 'Active') const PopupMenuItem(value: 'suspend', child: Text('Suspend Account', style: TextStyle(color: Colors.orange))),
                                                 if (status == 'Suspended' || status == 'Deleted') const PopupMenuItem(value: 'activate', child: Text('Activate Account', style: TextStyle(color: Colors.green))),
                                                 const PopupMenuItem(value: 'reset', child: Text('Reset Password', style: TextStyle(color: AdminTheme.textPrimary))),
-                                                if (status != 'Deleted') const PopupMenuItem(value: 'delete', child: Text('Soft Delete Account', style: TextStyle(color: Colors.orange))),
-                                                const PopupMenuItem(value: 'permanent_delete', child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))),
+                                                const PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.delete_outline, color: Colors.orange, size: 18),
+                                                      SizedBox(width: 8),
+                                                      Text('Move to Recycle Bin', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                                    ],
+                                                  ),
+                                                ),
                                               ],
                                             ),
                                           ],
