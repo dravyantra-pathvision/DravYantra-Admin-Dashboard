@@ -41,12 +41,31 @@ class ApiClient {
   // ── Response Handler ─────────────────────────────────────────────────────────
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return body;
+    dynamic body;
+    try {
+      body = jsonDecode(response.body);
+    } catch (_) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        throw ApiException(response.statusCode, 'Invalid JSON response from server');
+      }
+      throw ApiException(
+        response.statusCode, 
+        'Server returned error ${response.statusCode} (${response.reasonPhrase ?? "Error"})'
+      );
     }
-    final message = body['error'] ?? body['message'] ?? 'Unknown error';
-    throw ApiException(response.statusCode, message.toString());
+
+    if (body is Map<String, dynamic>) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return body;
+      }
+      final message = body['error'] ?? body['message'] ?? 'Server error (${response.statusCode})';
+      throw ApiException(response.statusCode, message.toString());
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return {'data': body};
+    }
+    throw ApiException(response.statusCode, 'Unexpected server response (${response.statusCode})');
   }
 
   // ── HTTP Methods ─────────────────────────────────────────────────────────────
