@@ -1122,25 +1122,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _hardDeleteRecycledItem(RecycledItem item) async {
+    final isHighRisk = item.entityType == 'fleet_owner' || item.entityType == 'organization';
+    final TextEditingController textController = TextEditingController();
+    bool isTypedValid = !isHighRisk;
+
     final confirm = await showDialog<bool>(
       context: context,
       useRootNavigator: true,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AdminTheme.surface,
-        title: const Text('PERMANENTLY DELETE ITEM', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-        content: Text(
-          'Are you sure you want to PERMANENTLY delete ${item.entityTypeLabel} "${item.title}" from the cloud database? This action CANNOT be undone.',
-          style: const TextStyle(color: AdminTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete Permanently'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AdminTheme.surface,
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    'PERMANENTLY DELETE ${item.entityTypeLabel.toUpperCase()}',
+                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: 440,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Are you sure you want to PERMANENTLY purge ${item.entityTypeLabel} "${item.title}" from the cloud database?',
+                      style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 14),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      ),
+                      child: const Text(
+                        '⚠️ WARNING: This will permanently destroy the record in PostgreSQL and purge Authentication credentials. This action CANNOT be undone.',
+                        style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    if (isHighRisk) ...[
+                      const SizedBox(height: 16),
+                      const Text(
+                        'To confirm permanent purge, please type DELETE below:',
+                        style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: textController,
+                        onChanged: (val) {
+                          setDialogState(() {
+                            isTypedValid = val.trim() == 'DELETE';
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Type DELETE to confirm',
+                          fillColor: AdminTheme.background,
+                          filled: true,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: isTypedValid
+                      ? () => Navigator.of(ctx, rootNavigator: true).pop(true)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    disabledBackgroundColor: Colors.red.withOpacity(0.3),
+                  ),
+                  child: const Text('Purge Permanently', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (confirm == true) {
