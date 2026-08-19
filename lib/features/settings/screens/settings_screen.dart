@@ -149,17 +149,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     },
   ];
 
+  final ScrollController _recycleBinScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SettingsProvider>().fetchSettings();
+      context.read<RecycleBinProvider>().fetchItems();
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _recycleBinScrollController.dispose();
     super.dispose();
   }
 
@@ -322,12 +326,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ..._categories.map((cat) {
             final key = cat['key'] as String;
             final isSelected = _selectedCategory == key;
-            final count = (provider.groupedSettings[key] ?? []).length;
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: InkWell(
-                onTap: () => setState(() => _selectedCategory = key),
+                onTap: () {
+                  setState(() => _selectedCategory = key);
+                  if (key == 'recycle_bin') {
+                    context.read<RecycleBinProvider>().fetchItems();
+                  }
+                },
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -350,21 +358,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             color: isSelected ? AdminTheme.primary : AdminTheme.textPrimary,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                             fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AdminTheme.primary : AdminTheme.background,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '$count',
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : AdminTheme.textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -1007,66 +1000,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         )
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: DataTable(
-                            headingRowColor: MaterialStateProperty.all(AdminTheme.background),
-                            columns: const [
-                              DataColumn(label: Text('ITEM NAME / ID', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
-                              DataColumn(label: Text('CATEGORY', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
-                              DataColumn(label: Text('DETAILS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
-                              DataColumn(label: Text('DELETED DATE', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
-                              DataColumn(label: Text('ACTIONS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
-                            ],
-                            rows: items.map((item) {
-                              final dateStr = DateFormat('yyyy-MM-dd HH:mm').format(item.deletedAt);
-                              return DataRow(
-                                cells: [
-                                  DataCell(
-                                    Text(item.title, style: const TextStyle(color: AdminTheme.textPrimary, fontWeight: FontWeight.bold)),
-                                  ),
-                                  DataCell(_buildCategoryBadge(item.entityTypeLabel)),
-                                  DataCell(
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(item.subtitle, style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 13)),
-                                        if (item.organization.isNotEmpty && item.organization != 'N/A')
-                                          Text(item.organization, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 11)),
-                                      ],
-                                    ),
-                                  ),
-                                  DataCell(Text(dateStr, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 13))),
-                                  DataCell(
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        // Restore Button
-                                        ElevatedButton.icon(
-                                          onPressed: () => _restoreRecycledItem(item),
-                                          icon: const Icon(Icons.restore_from_trash_rounded, size: 16),
-                                          label: const Text('Restore'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AdminTheme.success.withOpacity(0.15),
-                                            foregroundColor: AdminTheme.success,
-                                            elevation: 0,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        // Delete Permanently Button
-                                        OutlinedButton.icon(
-                                          onPressed: () => _hardDeleteRecycledItem(item),
-                                          icon: const Icon(Icons.delete_forever_rounded, size: 16, color: Colors.red),
-                                          label: const Text('Purge', style: TextStyle(color: Colors.red)),
-                                          style: OutlinedButton.styleFrom(
-                                            side: const BorderSide(color: Colors.red),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                          child: Scrollbar(
+                            controller: _recycleBinScrollController,
+                            thumbVisibility: true,
+                            trackVisibility: true,
+                            child: SingleChildScrollView(
+                              controller: _recycleBinScrollController,
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                dataRowMaxHeight: 64.0,
+                                dataRowMinHeight: 52.0,
+                                columnSpacing: 28.0,
+                                showCheckboxColumn: false,
+                                headingRowColor: WidgetStateProperty.all(AdminTheme.background),
+                                columns: const [
+                                  DataColumn(label: Text('ITEM NAME / ID', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                                  DataColumn(label: Text('CATEGORY', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                                  DataColumn(label: Text('DETAILS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                                  DataColumn(label: Text('DELETED DATE', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
+                                  DataColumn(label: Text('ACTIONS', style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold))),
                                 ],
-                              );
-                            }).toList(),
+                                rows: items.map((item) {
+                                  final dateStr = DateFormat('yyyy-MM-dd HH:mm').format(item.deletedAt);
+                                  return DataRow(
+                                    cells: [
+                                      DataCell(
+                                        Text(item.title, style: const TextStyle(color: AdminTheme.textPrimary, fontWeight: FontWeight.bold)),
+                                      ),
+                                      DataCell(_buildCategoryBadge(item.entityTypeLabel)),
+                                      DataCell(
+                                        Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item.subtitle, style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 13)),
+                                            if (item.organization.isNotEmpty && item.organization != 'N/A')
+                                              Text(item.organization, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 11)),
+                                          ],
+                                        ),
+                                      ),
+                                      DataCell(Text(dateStr, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 13))),
+                                      DataCell(
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // Restore Button
+                                            ElevatedButton.icon(
+                                              onPressed: () => _restoreRecycledItem(item),
+                                              icon: const Icon(Icons.restore_from_trash_rounded, size: 16),
+                                              label: const Text('Restore'),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AdminTheme.success.withOpacity(0.15),
+                                                foregroundColor: AdminTheme.success,
+                                                elevation: 0,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            // Delete Permanently Button
+                                            OutlinedButton.icon(
+                                              onPressed: () => _hardDeleteRecycledItem(item),
+                                              icon: const Icon(Icons.delete_forever_rounded, size: 16, color: Colors.red),
+                                              label: const Text('Delete Permanently', style: TextStyle(color: Colors.red)),
+                                              style: OutlinedButton.styleFrom(
+                                                side: const BorderSide(color: Colors.red),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
+                            ),
                           ),
                         ),
             ),
@@ -1151,7 +1157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Are you sure you want to PERMANENTLY purge ${item.entityTypeLabel} "${item.title}" from the cloud database?',
+                      'Are you sure you want to PERMANENTLY delete ${item.entityTypeLabel} "${item.title}" from the cloud database?',
                       style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 14),
                     ),
                     const SizedBox(height: 10),
@@ -1170,7 +1176,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (isHighRisk) ...[
                       const SizedBox(height: 16),
                       const Text(
-                        'To confirm permanent purge, please type DELETE below:',
+                        'To confirm permanent deletion, please type DELETE below:',
                         style: TextStyle(color: AdminTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -1206,7 +1212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     backgroundColor: Colors.red,
                     disabledBackgroundColor: Colors.red.withOpacity(0.3),
                   ),
-                  child: const Text('Purge Permanently', style: TextStyle(color: Colors.white)),
+                  child: const Text('Delete Permanently', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );

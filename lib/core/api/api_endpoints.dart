@@ -19,9 +19,8 @@ class ApiEndpoints {
   static String get profilePassword => '$base/api/admin/profile/password';
   static String get profilePhoto => '$base/api/admin/profile/photo';
   static String get profileSessions => '$base/api/admin/profile/sessions';
-  static String profileSession(String id) => '$base/api/admin/profile/sessions/$id';
+  static String profileSession(String id) => '$base/api/admin/profile/sessions/${Uri.encodeComponent(id)}';
   static String get profileNotifications => '$base/api/admin/profile/notifications';
-
 
   // ── Admin — Fleet Owners ─────────────────────────────────────────────────────
   static String get fleetOwners                      => '$base/api/admin/fleetowners';
@@ -73,12 +72,12 @@ class ApiEndpoints {
   // ── Admin — Settings ────────────────────────────────────────────────────────
   static String get settings           => '$base/api/admin/settings';
   static String get settingsHistory    => '$base/api/admin/settings/history';
-  static String setting(String key)    => '$base/api/admin/settings/$key';
+  static String setting(String key)    => '$base/api/admin/settings/${Uri.encodeComponent(key)}';
 
   // ── Admin — Live Monitoring ──────────────────────────────────────────────────
   static String get liveDashboard      => '$base/api/admin/live-dashboard';
   static String get liveVehicles       => '$base/api/admin/live-vehicles';
-  static String liveVehicle(String id) => '$base/api/admin/live-vehicle/$id';
+  static String liveVehicle(String id) => '$base/api/admin/live-vehicle/${Uri.encodeComponent(id)}';
   static String get liveAlerts         => '$base/api/admin/live-alerts';
   static String get liveStatistics     => '$base/api/admin/live-statistics';
   static String get liveFleetList      => '$base/api/admin/live-fleet-list';
@@ -97,15 +96,15 @@ class ApiEndpoints {
   // ── Admin — Support & Tickets ───────────────────────────────────────────────────
   static String get supportAnalytics   => '$base/api/admin/support/analytics';
   static String get supportTickets     => '$base/api/admin/support/tickets';
-  static String supportTicket(String n)=> '$base/api/admin/support/tickets/$n';
-  static String ticketMessages(String n)=> '$base/api/admin/support/tickets/$n/messages';
+  static String supportTicket(String n)=> '$base/api/admin/support/tickets/${Uri.encodeComponent(n)}';
+  static String ticketMessages(String n)=> '$base/api/admin/support/tickets/${Uri.encodeComponent(n)}/messages';
 
   // ── Admin — Subscriptions & Billing ─────────────────────────────────────────
   static String get subscriptionDashboard    => '$base/api/admin/subscriptions/dashboard';
   static String get subscriptionPlans        => '$base/api/admin/subscriptions/plans';
   static String subscriptionPlan(int id)     => '$base/api/admin/subscriptions/plans/$id';
   static String get subscriptions            => '$base/api/admin/subscriptions';
-  static String subscriptionByOrg(String uid)=> '$base/api/admin/subscriptions/org/$uid';
+  static String subscriptionByOrg(String uid)=> '$base/api/admin/subscriptions/org/${Uri.encodeComponent(uid)}';
   static String get subscriptionAssign       => '$base/api/admin/subscriptions/assign';
   static String subscriptionAction(int id, String action) => '$base/api/admin/subscriptions/$id/$action';
   static String get subscriptionInvoices     => '$base/api/admin/subscriptions/invoices';

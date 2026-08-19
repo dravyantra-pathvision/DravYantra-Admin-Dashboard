@@ -254,27 +254,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                             const SizedBox(height: 12),
 
-                            // Offline / Demo Access Option
-                            SizedBox(
-                              width: double.infinity,
-                              height: 44,
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AdminTheme.primaryLight,
-                                  side: const BorderSide(color: AdminTheme.primaryLight),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                onPressed: () {
-                                  context.read<AuthProvider>().enterOfflineMode();
-                                  if (mounted) context.go('/dashboard');
-                                },
-                                icon: const Icon(Icons.cloud_off_rounded, size: 18),
-                                label: const Text('Explore Admin Panel (Offline Mode)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
                             Center(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

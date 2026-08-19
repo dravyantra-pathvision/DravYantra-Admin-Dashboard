@@ -142,7 +142,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: DataTable(
-                            showCheckboxColumn: false,
+                          columnSpacing: 18.0,
+                          showCheckboxColumn: false,
                       columns: const [
                         DataColumn(label: Text('Vehicle No.', style: TextStyle(color: AdminTheme.textSecondary))),
                         DataColumn(label: Text('Organization', style: TextStyle(color: AdminTheme.textSecondary))),
