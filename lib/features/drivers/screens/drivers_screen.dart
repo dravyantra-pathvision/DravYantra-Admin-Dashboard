@@ -182,6 +182,7 @@ class _DriversScreenState extends State<DriversScreen> {
                         return SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: DataTable(
+                            columnSpacing: 20.0,
                             headingTextStyle: const TextStyle(fontWeight: FontWeight.bold, color: AdminTheme.textPrimary),
                             columns: const [
                               DataColumn(label: Text('Name')),

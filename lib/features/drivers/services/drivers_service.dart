@@ -53,18 +53,18 @@ class DriversService {
   }
 
   static Future<void> deleteDriver(String id) async {
-    await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$id');
+    final encodedId = Uri.encodeComponent(id);
+    await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$encodedId');
   }
 
   static Future<void> deleteDriverPermanent(String id) async {
-    // 1. Try primary query param endpoint
+    final encodedId = Uri.encodeComponent(id);
     try {
-      await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$id?permanent=true');
+      await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$encodedId?permanent=true');
       return;
     } catch (e) {
-      // If 404, try subpath fallback
       if (e.toString().contains('404')) {
-        await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$id/permanent');
+        await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$encodedId/permanent');
         return;
       }
       rethrow;
