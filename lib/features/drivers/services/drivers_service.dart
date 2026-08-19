@@ -24,18 +24,18 @@ class DriversService {
     if (fleetOwner != null && fleetOwner.isNotEmpty) queryParams['fleetOwner'] = fleetOwner;
     if (status != null && status.isNotEmpty && status != 'All') queryParams['status'] = status;
 
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/drivers', queryParams: queryParams);
+    final decoded = await _api.get(ApiEndpoints.drivers, queryParams: queryParams);
     return decoded; // our backend returns drivers, total, page, totalPages
   }
 
   static Future<Map<String, dynamic>> fetchDriverById(String id) async {
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/drivers/$id');
+    final decoded = await _api.get(ApiEndpoints.driver(id));
     return decoded;
   }
 
   static Future<void> updateDriverStatus(String id, String status, String remarks) async {
     await _api.put(
-      '${ApiEndpoints.base}/api/admin/drivers/$id/status',
+      ApiEndpoints.driverStatus(id),
       {
         'status': status,
         'remarks': remarks,
@@ -48,26 +48,15 @@ class DriversService {
     if (organization != null && organization.isNotEmpty) queryParams['organization'] = organization;
     if (status != null && status.isNotEmpty && status != 'All') queryParams['status'] = status;
 
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/drivers/export', queryParams: queryParams);
+    final decoded = await _api.get('${ApiEndpoints.drivers}/export', queryParams: queryParams);
     return decoded as List<dynamic>;
   }
 
   static Future<void> deleteDriver(String id) async {
-    final encodedId = Uri.encodeComponent(id);
-    await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$encodedId');
+    await _api.delete(ApiEndpoints.driver(id));
   }
 
   static Future<void> deleteDriverPermanent(String id) async {
-    final encodedId = Uri.encodeComponent(id);
-    try {
-      await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$encodedId?permanent=true');
-      return;
-    } catch (e) {
-      if (e.toString().contains('404')) {
-        await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$encodedId/permanent');
-        return;
-      }
-      rethrow;
-    }
+    await _api.delete(ApiEndpoints.driverPermanent(id));
   }
 }

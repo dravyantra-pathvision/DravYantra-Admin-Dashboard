@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../../app/constants.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/storage/secure_storage.dart';
 
 class OrganizationsService {
@@ -19,7 +19,7 @@ class OrganizationsService {
     final queryParams = <String, String>{};
     if (status != null && status != 'All') queryParams['status'] = status;
     if (search != null && search.isNotEmpty) queryParams['search'] = search;
-    final uri = Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations').replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+    final uri = Uri.parse(ApiEndpoints.organizations).replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
     
     final response = await http.get(uri, headers: headers);
     
@@ -34,7 +34,7 @@ class OrganizationsService {
   Future<Map<String, dynamic>> getOrganizationDetail(String uid) async {
     final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$uid'),
+      Uri.parse(ApiEndpoints.organization(uid)),
       headers: headers,
     );
     
@@ -49,7 +49,7 @@ class OrganizationsService {
   Future<void> deleteOrganization(String id) async {
     final headers = await _getHeaders();
     final response = await http.delete(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id'),
+      Uri.parse(ApiEndpoints.organization(id)),
       headers: headers,
     );
     if (response.statusCode != 200) {
@@ -60,19 +60,10 @@ class OrganizationsService {
   Future<void> deleteOrganizationPermanent(String id) async {
     final headers = await _getHeaders();
 
-    // 1. Try primary query param endpoint
-    var response = await http.delete(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id?permanent=true'),
+    final response = await http.delete(
+      Uri.parse(ApiEndpoints.organizationPermanent(id)),
       headers: headers,
     );
-
-    // 2. Fallback to subpath endpoint if 404
-    if (response.statusCode == 404) {
-      response = await http.delete(
-        Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id/permanent'),
-        headers: headers,
-      );
-    }
 
     if (response.statusCode != 200) {
       String msg = 'Failed to permanently delete organization';
@@ -88,7 +79,7 @@ class OrganizationsService {
   Future<void> updateStatus(String id, String action, {String? reason}) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id/$action'),
+      Uri.parse('${ApiEndpoints.organization(id)}/$action'),
       headers: headers,
       body: reason != null ? jsonEncode({'reason': reason}) : jsonEncode({}),
     );

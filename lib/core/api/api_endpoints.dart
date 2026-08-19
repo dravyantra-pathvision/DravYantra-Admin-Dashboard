@@ -24,22 +24,42 @@ class ApiEndpoints {
 
 
   // ── Admin — Fleet Owners ─────────────────────────────────────────────────────
-  static String get fleetOwners        => '$base/api/admin/fleetowners';
+  static String get fleetOwners                      => '$base/api/admin/fleetowners';
+  static String fleetOwner(String uid)               => '$base/api/admin/fleetowners/${Uri.encodeComponent(uid)}';
+  static String fleetOwnerStatus(String uid)         => '$base/api/admin/fleetowners/${Uri.encodeComponent(uid)}/status';
+  static String fleetOwnerRestore(String uid)        => '$base/api/admin/fleetowners/${Uri.encodeComponent(uid)}/restore';
+  static String fleetOwnerPermanent(String uid)      => '$base/api/admin/fleetowners/${Uri.encodeComponent(uid)}/permanent';
 
   // ── Admin — Organizations ────────────────────────────────────────────────────
-  static String get organizations               => '$base/api/admin/organizations';
-  static String organization(String uid)        => '$base/api/admin/organizations/$uid';
+  static String get organizations                    => '$base/api/admin/organizations';
+  static String organization(String id)              => '$base/api/admin/organizations/${Uri.encodeComponent(id)}';
+  static String organizationRestore(String id)       => '$base/api/admin/organizations/${Uri.encodeComponent(id)}/restore';
+  static String organizationPermanent(String id)     => '$base/api/admin/organizations/${Uri.encodeComponent(id)}/permanent';
 
   // ── Admin — Vehicles ────────────────────────────────────────────────────────
-  static String get vehicles           => '$base/api/admin/vehicles';
-  static String vehicle(String id)     => '$base/api/admin/vehicles/$id';
-  static String vehicleStatus(String id) => '$base/api/admin/vehicles/$id/status';
+  static String get vehicles                         => '$base/api/admin/vehicles';
+  static String vehicle(String id)                   => '$base/api/admin/vehicles/${Uri.encodeComponent(id)}';
+  static String vehicleStatus(String id)             => '$base/api/admin/vehicles/${Uri.encodeComponent(id)}/status';
+  static String vehicleRestore(String id)            => '$base/api/admin/vehicles/${Uri.encodeComponent(id)}/restore';
+  static String vehiclePermanent(String id)          => '$base/api/admin/vehicles/${Uri.encodeComponent(id)}/permanent';
 
   // ── Admin — Drivers ─────────────────────────────────────────────────────────
-  static String get drivers            => '$base/api/admin/drivers';
+  static String get drivers                          => '$base/api/admin/drivers';
+  static String driver(String id)                    => '$base/api/admin/drivers/${Uri.encodeComponent(id)}';
+  static String driverStatus(String id)              => '$base/api/admin/drivers/${Uri.encodeComponent(id)}/status';
+  static String driverRestore(String id)             => '$base/api/admin/drivers/${Uri.encodeComponent(id)}/restore';
+  static String driverPermanent(String id)           => '$base/api/admin/drivers/${Uri.encodeComponent(id)}/permanent';
 
   // ── Admin — Trips ───────────────────────────────────────────────────────────
-  static String get trips              => '$base/api/admin/trips';
+  static String get trips                            => '$base/api/admin/trips';
+  static String trip(String id)                      => '$base/api/admin/trips/${Uri.encodeComponent(id)}';
+  static String tripRestore(String id)               => '$base/api/admin/trips/${Uri.encodeComponent(id)}/restore';
+  static String tripPermanent(String id)             => '$base/api/admin/trips/${Uri.encodeComponent(id)}/permanent';
+
+  // ── Admin — Recycle Bin ──────────────────────────────────────────────────────
+  static String get recycleBin                       => '$base/api/admin/recycle-bin';
+  static String get recycleBinRestore                => '$base/api/admin/recycle-bin/restore';
+  static String get recycleBinPermanent              => '$base/api/admin/recycle-bin/permanent';
 
   // ── Admin — Alerts ──────────────────────────────────────────────────────────
   static String get alerts             => '$base/api/admin/alerts';

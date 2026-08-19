@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../../app/constants.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/storage/secure_storage.dart';
 
 class FleetOwnersService {
@@ -23,7 +23,7 @@ class FleetOwnersService {
     queryParams['page'] = page.toString();
     queryParams['limit'] = limit.toString();
     
-    final uri = Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners').replace(queryParameters: queryParams);
+    final uri = Uri.parse(ApiEndpoints.fleetOwners).replace(queryParameters: queryParams);
     
     final response = await http.get(uri, headers: headers);
     
@@ -38,7 +38,7 @@ class FleetOwnersService {
   Future<Map<String, dynamic>> getFleetOwnerDetail(String uid) async {
     final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid'),
+      Uri.parse(ApiEndpoints.fleetOwner(uid)),
       headers: headers,
     );
     
@@ -53,7 +53,7 @@ class FleetOwnersService {
   Future<void> updateFleetOwner(String uid, Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await http.put(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid'),
+      Uri.parse(ApiEndpoints.fleetOwner(uid)),
       headers: headers,
       body: jsonEncode(data),
     );
@@ -66,7 +66,7 @@ class FleetOwnersService {
   Future<void> updateStatus(String uid, String status) async {
     final headers = await _getHeaders();
     final response = await http.patch(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid/status'),
+      Uri.parse(ApiEndpoints.fleetOwnerStatus(uid)),
       headers: headers,
       body: jsonEncode({'status': status}),
     );
@@ -79,7 +79,7 @@ class FleetOwnersService {
   Future<void> deleteFleetOwner(String uid) async {
     final headers = await _getHeaders();
     final response = await http.delete(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid'),
+      Uri.parse(ApiEndpoints.fleetOwner(uid)),
       headers: headers,
     );
     
@@ -91,19 +91,10 @@ class FleetOwnersService {
   Future<void> deleteFleetOwnerPermanent(String uid) async {
     final headers = await _getHeaders();
     
-    // 1. Try primary query param endpoint
-    var response = await http.delete(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid?permanent=true'),
+    final response = await http.delete(
+      Uri.parse(ApiEndpoints.fleetOwnerPermanent(uid)),
       headers: headers,
     );
-
-    // 2. Fallback to subpath endpoint if 404
-    if (response.statusCode == 404) {
-      response = await http.delete(
-        Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid/permanent'),
-        headers: headers,
-      );
-    }
     
     if (response.statusCode != 200) {
       String msg = 'Failed to permanently delete fleet owner';
@@ -119,7 +110,7 @@ class FleetOwnersService {
   Future<String?> resetPassword(String uid) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/fleetowners/$uid/reset-password'),
+      Uri.parse('${ApiEndpoints.fleetOwner(uid)}/reset-password'),
       headers: headers,
     );
     

@@ -18,7 +18,7 @@ class RecycleBinService {
     if (type != null && type.isNotEmpty && type != 'all') queryParams['type'] = type;
     if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/recycle-bin', queryParams: queryParams);
+    final decoded = await _api.get(ApiEndpoints.recycleBin, queryParams: queryParams);
     final List<dynamic> data = decoded['data'] ?? [];
     final total = decoded['total'] ?? 0;
 
@@ -30,7 +30,7 @@ class RecycleBinService {
 
   Future<void> restoreItem(String entityType, String id) async {
     await _api.post(
-      '${ApiEndpoints.base}/api/admin/recycle-bin/restore',
+      ApiEndpoints.recycleBinRestore,
       {
         'entity_type': entityType,
         'id': id,
@@ -41,7 +41,7 @@ class RecycleBinService {
   Future<void> hardDeleteItem(String entityType, String id) async {
     try {
       await _api.post(
-        '${ApiEndpoints.base}/api/admin/recycle-bin/permanent',
+        ApiEndpoints.recycleBinPermanent,
         {
           'entity_type': entityType,
           'id': id,
@@ -49,7 +49,7 @@ class RecycleBinService {
       );
     } catch (e) {
       await _api.delete(
-        '${ApiEndpoints.base}/api/admin/recycle-bin/permanent',
+        ApiEndpoints.recycleBinPermanent,
         body: {
           'entity_type': entityType,
           'id': id,

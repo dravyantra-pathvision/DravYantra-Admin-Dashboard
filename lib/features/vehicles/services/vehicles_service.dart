@@ -28,7 +28,7 @@ class VehiclesService {
     if (organization != null && organization.isNotEmpty) queryParams['organization'] = organization;
     if (fleetOwner != null && fleetOwner.isNotEmpty) queryParams['fleetOwner'] = fleetOwner;
 
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/vehicles', queryParams: queryParams);
+    final decoded = await _api.get(ApiEndpoints.vehicles, queryParams: queryParams);
     final List<dynamic> data = decoded['data'] ?? [];
     final total = decoded['total'] ?? 0;
     return {
@@ -38,19 +38,19 @@ class VehiclesService {
   }
 
   Future<Vehicle> getVehicleDetail(String plate) async {
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/vehicles/$plate');
+    final decoded = await _api.get(ApiEndpoints.vehicle(plate));
     return Vehicle.fromJson(decoded['data']);
   }
 
   Future<List<VehicleAuditLog>> getVehicleAuditLogs(String plate) async {
-    final decoded = await _api.get('${ApiEndpoints.base}/api/admin/vehicles/$plate/logs');
+    final decoded = await _api.get('${ApiEndpoints.vehicle(plate)}/logs');
     final List<dynamic> data = decoded['data'] ?? [];
     return data.map((l) => VehicleAuditLog.fromJson(l)).toList();
   }
 
   Future<void> blockVehicle(String plate, String reason, String remarks) async {
     await _api.post(
-      '${ApiEndpoints.base}/api/admin/vehicles/$plate/block',
+      '${ApiEndpoints.vehicle(plate)}/block',
       {
         'reason': reason,
         'remarks': remarks,
@@ -60,7 +60,7 @@ class VehiclesService {
 
   Future<void> suspendVehicle(String plate, String reason, String remarks) async {
     await _api.post(
-      '${ApiEndpoints.base}/api/admin/vehicles/$plate/suspend',
+      '${ApiEndpoints.vehicle(plate)}/suspend',
       {
         'reason': reason,
         'remarks': remarks,
@@ -70,27 +70,16 @@ class VehiclesService {
 
   Future<void> reactivateVehicle(String plate) async {
     await _api.post(
-      '${ApiEndpoints.base}/api/admin/vehicles/$plate/reactivate',
+      '${ApiEndpoints.vehicle(plate)}/reactivate',
       {},
     );
   }
 
   Future<void> deleteVehicle(String plate) async {
-    await _api.delete('${ApiEndpoints.base}/api/admin/vehicles/$plate');
+    await _api.delete(ApiEndpoints.vehicle(plate));
   }
 
   Future<void> deleteVehiclePermanent(String plate) async {
-    // 1. Try primary query param endpoint
-    try {
-      await _api.delete('${ApiEndpoints.base}/api/admin/vehicles/$plate?permanent=true');
-      return;
-    } catch (e) {
-      // If 404, try subpath fallback
-      if (e.toString().contains('404')) {
-        await _api.delete('${ApiEndpoints.base}/api/admin/vehicles/$plate/permanent');
-        return;
-      }
-      rethrow;
-    }
+    await _api.delete(ApiEndpoints.vehiclePermanent(plate));
   }
 }

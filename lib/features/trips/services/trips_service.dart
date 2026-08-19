@@ -23,7 +23,7 @@ class TripsService {
     if (fromDate != null && fromDate.isNotEmpty) queryParams['from_date'] = fromDate;
     if (toDate != null && toDate.isNotEmpty) queryParams['to_date'] = toDate;
 
-    final response = await _apiClient.get('${ApiEndpoints.base}/api/admin/trips', queryParams: queryParams);
+    final response = await _apiClient.get(ApiEndpoints.trips, queryParams: queryParams);
     
     if (response['success'] == true) {
       final List<dynamic> data = response['data'] ?? [];
@@ -37,7 +37,7 @@ class TripsService {
   }
 
   Future<Trip> getTripById(String id) async {
-    final response = await _apiClient.get('${ApiEndpoints.base}/api/admin/trips/$id');
+    final response = await _apiClient.get(ApiEndpoints.trip(id));
     if (response['success'] == true && response['trip'] != null) {
       return Trip.fromJson(response['trip']);
     } else {
@@ -46,7 +46,7 @@ class TripsService {
   }
 
   Future<List<dynamic>> getTripTimeline(String id) async {
-    final response = await _apiClient.get('${ApiEndpoints.base}/api/admin/trips/$id/timeline');
+    final response = await _apiClient.get('${ApiEndpoints.trip(id)}/timeline');
     if (response['success'] == true) {
       return response['timeline'] as List<dynamic>;
     } else {
@@ -66,25 +66,14 @@ class TripsService {
     if (fromDate != null && fromDate.isNotEmpty) queryParams['from_date'] = fromDate;
     if (toDate != null && toDate.isNotEmpty) queryParams['to_date'] = toDate;
 
-    return await _apiClient.downloadFile('${ApiEndpoints.base}/api/admin/trips/export', queryParams: queryParams);
+    return await _apiClient.downloadFile('${ApiEndpoints.trips}/export', queryParams: queryParams);
   }
 
   Future<void> deleteTrip(String id) async {
-    await _apiClient.delete('${ApiEndpoints.base}/api/admin/trips/$id');
+    await _apiClient.delete(ApiEndpoints.trip(id));
   }
 
   Future<void> deleteTripPermanent(String id) async {
-    // 1. Try primary query param endpoint
-    try {
-      await _apiClient.delete('${ApiEndpoints.base}/api/admin/trips/$id?permanent=true');
-      return;
-    } catch (e) {
-      // If 404, try subpath fallback
-      if (e.toString().contains('404')) {
-        await _apiClient.delete('${ApiEndpoints.base}/api/admin/trips/$id/permanent');
-        return;
-      }
-      rethrow;
-    }
+    await _apiClient.delete(ApiEndpoints.tripPermanent(id));
   }
 }
