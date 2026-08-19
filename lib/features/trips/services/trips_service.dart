@@ -68,4 +68,19 @@ class TripsService {
 
     return await _apiClient.downloadFile('${ApiEndpoints.base}/api/admin/trips/export', queryParams: queryParams);
   }
+
+  Future<void> deleteTripPermanent(String id) async {
+    // 1. Try primary query param endpoint
+    try {
+      await _apiClient.delete('${ApiEndpoints.base}/api/admin/trips/$id?permanent=true');
+      return;
+    } catch (e) {
+      // If 404, try subpath fallback
+      if (e.toString().contains('404')) {
+        await _apiClient.delete('${ApiEndpoints.base}/api/admin/trips/$id/permanent');
+        return;
+      }
+      rethrow;
+    }
+  }
 }

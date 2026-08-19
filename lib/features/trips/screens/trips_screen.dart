@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme.dart';
 import '../providers/trips_provider.dart';
+import '../services/trips_service.dart';
 
 class TripsScreen extends StatefulWidget {
   const TripsScreen({super.key});
@@ -14,6 +15,7 @@ class TripsScreen extends StatefulWidget {
 
 class _TripsScreenState extends State<TripsScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final TripsService _tripsService = TripsService();
 
   @override
   void initState() {
@@ -70,6 +72,41 @@ class _TripsScreenState extends State<TripsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export failed: $e'), backgroundColor: AdminTheme.danger));
+      }
+    }
+  }
+
+  void _deleteTripPermanent(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AdminTheme.surface,
+        title: const Text('Permanently Delete Trip', style: TextStyle(color: Colors.red)),
+        content: const Text(
+          'Are you sure you want to PERMANENTLY delete this trip and all associated data? This action CANNOT be undone.',
+          style: TextStyle(color: AdminTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _tripsService.deleteTripPermanent(id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trip permanently deleted successfully')));
+          context.read<TripsProvider>().fetchTrips(refresh: true);
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -210,10 +247,28 @@ class _TripsScreenState extends State<TripsScreen> {
                                   DataCell(_buildStatusBadge(trip.status ?? 'Unknown')),
                                   DataCell(Text('${trip.distance?.toStringAsFixed(1) ?? '0.0'} km', style: const TextStyle(color: AdminTheme.textPrimary))),
                                   DataCell(
-                                    IconButton(
-                                      icon: const Icon(Icons.visibility, color: Colors.blue),
-                                      onPressed: () => context.go('/trips/${trip.id}'),
-                                      tooltip: 'View Details',
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.visibility, color: Colors.blue),
+                                          onPressed: () => context.go('/trips/${trip.id}'),
+                                          tooltip: 'View Details',
+                                        ),
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
+                                          color: AdminTheme.surface,
+                                          onSelected: (value) {
+                                            if (value == 'permanent_delete') _deleteTripPermanent(trip.id);
+                                          },
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: 'permanent_delete',
+                                              child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],

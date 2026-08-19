@@ -46,6 +46,34 @@ class OrganizationsService {
     }
   }
 
+  Future<void> deleteOrganizationPermanent(String id) async {
+    final headers = await _getHeaders();
+
+    // 1. Try primary query param endpoint
+    var response = await http.delete(
+      Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id?permanent=true'),
+      headers: headers,
+    );
+
+    // 2. Fallback to subpath endpoint if 404
+    if (response.statusCode == 404) {
+      response = await http.delete(
+        Uri.parse('${AppConstants.apiBaseUrl}/api/admin/organizations/$id/permanent'),
+        headers: headers,
+      );
+    }
+
+    if (response.statusCode != 200) {
+      String msg = 'Failed to permanently delete organization';
+      try {
+        final body = jsonDecode(response.body);
+        if (body['message'] != null) msg = body['message'];
+        else if (body['error'] != null) msg = body['error'];
+      } catch (_) {}
+      throw Exception(msg);
+    }
+  }
+
   Future<void> updateStatus(String id, String action, {String? reason}) async {
     final headers = await _getHeaders();
     final response = await http.post(

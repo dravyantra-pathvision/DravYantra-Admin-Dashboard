@@ -51,4 +51,19 @@ class DriversService {
     final decoded = await _api.get('${ApiEndpoints.base}/api/admin/drivers/export', queryParams: queryParams);
     return decoded as List<dynamic>;
   }
+
+  static Future<void> deleteDriverPermanent(String id) async {
+    // 1. Try primary query param endpoint
+    try {
+      await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$id?permanent=true');
+      return;
+    } catch (e) {
+      // If 404, try subpath fallback
+      if (e.toString().contains('404')) {
+        await _api.delete('${ApiEndpoints.base}/api/admin/drivers/$id/permanent');
+        return;
+      }
+      rethrow;
+    }
+  }
 }

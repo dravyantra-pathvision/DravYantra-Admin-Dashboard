@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../providers/drivers_provider.dart';
+import '../services/drivers_service.dart';
 
 class DriversScreen extends StatefulWidget {
   const DriversScreen({super.key});
@@ -38,6 +39,41 @@ class _DriversScreenState extends State<DriversScreen> {
         return Colors.orange;
       default:
         return Colors.grey;
+    }
+  }
+
+  void _deleteDriverPermanent(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AdminTheme.surface,
+        title: const Text('Permanently Delete Driver', style: TextStyle(color: Colors.red)),
+        content: const Text(
+          'Are you sure you want to PERMANENTLY delete this driver and all associated data? This action CANNOT be undone.',
+          style: TextStyle(color: AdminTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await DriversService.deleteDriverPermanent(id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver permanently deleted successfully')));
+          context.read<DriversProvider>().fetchDrivers(resetPage: true);
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -197,11 +233,29 @@ class _DriversScreenState extends State<DriversScreen> {
                                     ),
                                   ),
                                   DataCell(
-                                    IconButton(
-                                      icon: const Icon(Icons.visibility, color: AdminTheme.primary),
-                                      onPressed: () {
-                                        context.go('/drivers/${driver.id}');
-                                      },
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.visibility, color: AdminTheme.primary),
+                                          onPressed: () {
+                                            context.go('/drivers/${driver.id}');
+                                          },
+                                        ),
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
+                                          color: AdminTheme.surface,
+                                          onSelected: (value) {
+                                            if (value == 'permanent_delete') _deleteDriverPermanent(driver.id);
+                                          },
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: 'permanent_delete',
+                                              child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],

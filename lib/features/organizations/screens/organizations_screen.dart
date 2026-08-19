@@ -223,6 +223,43 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
     );
   }
 
+  void _deleteOrganizationPermanent(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AdminTheme.surface,
+        title: const Text('Permanently Delete Organization', style: TextStyle(color: Colors.red)),
+        content: const Text(
+          'Are you sure you want to PERMANENTLY delete this organization and all associated data? This action CANNOT be undone.',
+          style: TextStyle(color: AdminTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _service.deleteOrganizationPermanent(id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permanently deleted successfully')));
+          setState(() {
+            _organizations.removeWhere((item) => item['uid']?.toString() == id || item['id']?.toString() == id);
+          });
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
   Future<void> _updateStatus(String orgId, String action, BuildContext dialogContext, {String? reason}) async {
     try {
       await _service.updateStatus(orgId, action, reason: reason?.isEmpty == true ? null : reason);
@@ -335,11 +372,13 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                                       DataColumn(label: Text('Org Status')),
                                       DataColumn(label: Text('City')),
                                       DataColumn(label: Text('Joined At')),
+                                      DataColumn(label: Text('Actions')),
                                     ],
                                     rows: _organizations.map((org) {
                                       final status = org['status'] ?? 'Unknown';
                                       final accStatus = org['account_status'] ?? 'Active';
                                       final phone = (org['phone'] != null && org['phone'].toString().isNotEmpty) ? org['phone'].toString() : (org['contact_number'] ?? 'N/A');
+                                      final orgId = org['id']?.toString() ?? org['uid']?.toString() ?? '';
                                       
                                       return DataRow(
                                         onSelectChanged: (_) => _showOrganizationDetails(org),
@@ -364,6 +403,21 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                                           ),
                                           DataCell(Text(org['city'] ?? 'N/A')),
                                           DataCell(Text(org['created_at']?.toString().substring(0, 10) ?? 'N/A')),
+                                          DataCell(
+                                            PopupMenuButton<String>(
+                                              icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
+                                              color: AdminTheme.surface,
+                                              onSelected: (value) {
+                                                if (value == 'permanent_delete') _deleteOrganizationPermanent(orgId);
+                                              },
+                                              itemBuilder: (context) => [
+                                                const PopupMenuItem(
+                                                  value: 'permanent_delete',
+                                                  child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ],
                                       );
                                     }).toList(),

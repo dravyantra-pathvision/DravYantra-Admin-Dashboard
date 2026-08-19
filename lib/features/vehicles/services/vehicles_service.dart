@@ -74,4 +74,19 @@ class VehiclesService {
       {},
     );
   }
+
+  Future<void> deleteVehiclePermanent(String plate) async {
+    // 1. Try primary query param endpoint
+    try {
+      await _api.delete('${ApiEndpoints.base}/api/admin/vehicles/$plate?permanent=true');
+      return;
+    } catch (e) {
+      // If 404, try subpath fallback
+      if (e.toString().contains('404')) {
+        await _api.delete('${ApiEndpoints.base}/api/admin/vehicles/$plate/permanent');
+        return;
+      }
+      rethrow;
+    }
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../app/theme.dart';
 import '../providers/vehicles_provider.dart';
+import '../services/vehicles_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
@@ -14,6 +15,7 @@ class VehiclesScreen extends StatefulWidget {
 
 class _VehiclesScreenState extends State<VehiclesScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final VehiclesService _service = VehiclesService();
 
   @override
   void initState() {
@@ -176,15 +178,33 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                             DataCell(Text('${vehicle.make ?? '-'} ${vehicle.model ?? '-'}', style: const TextStyle(color: AdminTheme.textPrimary))),
                             DataCell(Text(vehicle.deviceId ?? 'Not Assigned', style: const TextStyle(color: AdminTheme.textPrimary))),
                             DataCell(_buildStatusBadge(vehicle.status ?? 'Unknown')),
-                            DataCell(
-                              IconButton(
-                                icon: const Icon(Icons.visibility, color: Colors.blue),
-                                onPressed: () {
-                                  context.go('/vehicles/${vehicle.plate}');
-                                },
-                                tooltip: 'View Details',
-                              ),
-                            ),
+                                DataCell(
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.visibility, color: Colors.blue),
+                                        onPressed: () {
+                                          context.go('/vehicles/${vehicle.plate}');
+                                        },
+                                        tooltip: 'View Details',
+                                      ),
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(Icons.more_vert, color: AdminTheme.textSecondary),
+                                        color: AdminTheme.surface,
+                                        onSelected: (value) {
+                                          if (value == 'permanent_delete') _deleteVehiclePermanent(vehicle.plate);
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'permanent_delete',
+                                            child: Text('Delete Permanently', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                           ],
                         );
                       }).toList(),
@@ -236,6 +256,41 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     if (vehicle.fitnessExpiry != null && vehicle.fitnessExpiry!.isBefore(now)) return true;
     if (vehicle.pucExpiry != null && vehicle.pucExpiry!.isBefore(now)) return true;
     return false;
+  }
+
+  void _deleteVehiclePermanent(String plate) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AdminTheme.surface,
+        title: const Text('Permanently Delete Vehicle', style: TextStyle(color: Colors.red)),
+        content: const Text(
+          'Are you sure you want to PERMANENTLY delete this vehicle and all associated data? This action CANNOT be undone.',
+          style: TextStyle(color: AdminTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _service.deleteVehiclePermanent(plate);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vehicle permanently deleted successfully')));
+          context.read<VehiclesProvider>().loadVehicles(resetPage: true);
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
   }
 
   Widget _buildStatusBadge(String status) {
