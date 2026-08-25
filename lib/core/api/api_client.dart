@@ -108,7 +108,10 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> delete(String url) async {
-    final response = await http.delete(Uri.parse(url), headers: await _headers())
+    // Use Uri.parse on the already-encoded URL directly (avoids double-encoding %20 → %2520)
+    final uri = Uri.parse(url);
+    if (kDebugMode) debugPrint('ApiClient DELETE: $uri');
+    final response = await http.delete(uri, headers: await _headers())
         .timeout(const Duration(seconds: 15));
     return _handleResponse(response);
   }

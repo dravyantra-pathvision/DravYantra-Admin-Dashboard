@@ -391,12 +391,6 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Fleet Owners', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
-                ElevatedButton.icon(
-                  onPressed: _fetchData,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh'),
-                  style: ElevatedButton.styleFrom(backgroundColor: AdminTheme.primary, foregroundColor: Colors.white),
-                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -490,7 +484,9 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                               builder: (context, constraints) {
                                 return SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
-                                  child: DataTable(
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                                    child: DataTable(
                                     columns: const [
                                       DataColumn(label: Text('Name', style: TextStyle(color: AdminTheme.textSecondary))),
                                       DataColumn(label: Text('Email', style: TextStyle(color: AdminTheme.textSecondary))),
@@ -545,9 +541,9 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                                       ]);
                                     }).toList(),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
                         ),
             ),
