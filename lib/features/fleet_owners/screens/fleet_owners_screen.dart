@@ -546,6 +546,7 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
                             },
                           ),
                         ),
+                      ),
             ),
           ],
         ),
