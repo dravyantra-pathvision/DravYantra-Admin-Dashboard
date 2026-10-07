@@ -134,51 +134,60 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                   return const Center(child: Text('No vehicles found.'));
                 }
 
+                final textOnSurface = Theme.of(context).colorScheme.onSurface;
+                final textMuted     = Theme.of(context).textTheme.bodySmall?.color ?? AdminTheme.textSecondary;
+                final cardColor     = Theme.of(context).cardColor;
+                final dividerColor  = Theme.of(context).dividerColor;
+
                 return Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(color: AdminTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AdminTheme.border)),
+                  decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: dividerColor)),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          columnSpacing: 18.0,
-                          showCheckboxColumn: false,
-                      columns: const [
-                        DataColumn(label: Text('Vehicle No.', style: TextStyle(color: AdminTheme.textSecondary))),
-                        DataColumn(label: Text('Organization', style: TextStyle(color: AdminTheme.textSecondary))),
-                        DataColumn(label: Text('Owner Email', style: TextStyle(color: AdminTheme.textSecondary))),
-                        DataColumn(label: Text('Make/Model', style: TextStyle(color: AdminTheme.textSecondary))),
-                        DataColumn(label: Text('Device ID', style: TextStyle(color: AdminTheme.textSecondary))),
-                        DataColumn(label: Text('Status', style: TextStyle(color: AdminTheme.textSecondary))),
-                        DataColumn(label: Text('Actions', style: TextStyle(color: AdminTheme.textSecondary))),
-                      ],
-                      rows: provider.vehicles.map((vehicle) {
-                        return DataRow(
-                          onSelectChanged: (_) {
-                            context.go('/vehicles/${vehicle.plate}');
-                          },
-                          cells: [
-                            DataCell(
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(vehicle.plate, style: const TextStyle(fontWeight: FontWeight.bold, color: AdminTheme.textPrimary)),
-                                  if (_hasExpiredDocs(vehicle)) ...[
-                                    const SizedBox(width: 8),
-                                    const Tooltip(
-                                      message: 'Documents Expiring/Expired',
-                                      child: Icon(Icons.warning, color: Colors.orange, size: 16),
-                                    )
-                                  ]
-                                ],
-                              ),
-                            ),
-                            DataCell(Text(vehicle.organizationName ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
-                            DataCell(Text(vehicle.fleetOwnerEmail ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
-                            DataCell(Text('${vehicle.make ?? '-'} ${vehicle.model ?? '-'}', style: const TextStyle(color: AdminTheme.textPrimary))),
-                            DataCell(Text(vehicle.deviceId ?? 'Not Assigned', style: const TextStyle(color: AdminTheme.textPrimary))),
-                            DataCell(_buildStatusBadge(vehicle.status ?? 'Unknown')),
+                        scrollDirection: Axis.vertical,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columnSpacing: 18.0,
+                            headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface),
+                            dataTextStyle: TextStyle(color: textOnSurface),
+                            showCheckboxColumn: false,
+                            columns: [
+                              DataColumn(label: Text('Vehicle No.', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Organization', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Owner Email', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Make/Model', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Device ID', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Status', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Actions', style: TextStyle(color: textMuted))),
+                            ],
+                            rows: provider.vehicles.map((vehicle) {
+                              return DataRow(
+                                onSelectChanged: (_) {
+                                  context.go('/vehicles/${vehicle.plate}');
+                                },
+                                cells: [
+                                  DataCell(
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(vehicle.plate, style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface)),
+                                        if (_hasExpiredDocs(vehicle)) ...[
+                                          const SizedBox(width: 8),
+                                          const Tooltip(
+                                            message: 'Documents Expiring/Expired',
+                                            child: Icon(Icons.warning, color: Colors.orange, size: 16),
+                                          )
+                                        ]
+                                      ],
+                                    ),
+                                  ),
+                                  DataCell(Text(vehicle.organizationName ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                  DataCell(Text(vehicle.fleetOwnerEmail ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                  DataCell(Text('${vehicle.make ?? '-'} ${vehicle.model ?? '-'}', style: TextStyle(color: textOnSurface))),
+                                  DataCell(Text(vehicle.deviceId ?? 'Not Assigned', style: TextStyle(color: textOnSurface))),
+                                  DataCell(_buildStatusBadge(vehicle.status ?? 'Unknown')),
                                 DataCell(
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -216,7 +225,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                         );
                       }).toList(),
                     ),
-                  );
+                  ),
+                );
                 },
               ),
             );

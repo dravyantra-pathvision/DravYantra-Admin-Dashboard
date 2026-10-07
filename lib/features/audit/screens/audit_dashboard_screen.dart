@@ -5,8 +5,6 @@ import 'package:intl/intl.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import '../../../app/theme.dart';
-import '../../../shared/components/admin_sidebar.dart';
-import '../../../shared/components/top_navbar.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../providers/audit_provider.dart';
 import '../models/system_audit_log_model.dart';
@@ -66,7 +64,7 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
       final bytes = utf8.encode(csvData);
       final blob = html.Blob([bytes]);
       final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
+      html.AnchorElement(href: url)
         ..setAttribute('download', 'audit_logs_${DateTime.now().toIso8601String()}.csv')
         ..click();
       html.Url.revokeObjectUrl(url);
@@ -82,7 +80,8 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Audit Log Details'),
+          backgroundColor: Theme.of(context).cardColor,
+          title: Text('Audit Log Details', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
           content: SizedBox(
             width: 600,
             child: SingleChildScrollView(
@@ -98,7 +97,7 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
                   _buildDetailRow('Browser', log.browser ?? 'N/A'),
                   const Divider(height: 32),
                   if (log.oldValue != null) ...[
-                    Text('Old Value:', style: Theme.of(context).textTheme.titleSmall),
+                    Text('Old Value:', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -106,12 +105,12 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
                         color: Colors.red.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(const JsonEncoder.withIndent('  ').convert(log.oldValue)),
+                      child: Text(const JsonEncoder.withIndent('  ').convert(log.oldValue), style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                     ),
                     const SizedBox(height: 16),
                   ],
                   if (log.newValue != null) ...[
-                    Text('New Value:', style: Theme.of(context).textTheme.titleSmall),
+                    Text('New Value:', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -119,7 +118,7 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
                         color: Colors.green.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(const JsonEncoder.withIndent('  ').convert(log.newValue)),
+                      child: Text(const JsonEncoder.withIndent('  ').convert(log.newValue), style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                     ),
                   ],
                 ],
@@ -147,10 +146,10 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
             ),
           ),
-          Expanded(child: Text(value)),
+          Expanded(child: Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface))),
         ],
       ),
     );
@@ -158,19 +157,21 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textOnSurface = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
-      backgroundColor: AdminTheme.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Activity Center & Audit Logs',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: textOnSurface,
               ),
             ),
             const SizedBox(height: 24),
@@ -186,7 +187,7 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
                     return Center(child: Text(provider.error!, style: const TextStyle(color: Colors.red)));
                   }
                   if (provider.logs.isEmpty) {
-                    return const Center(child: Text('No audit logs found.'));
+                    return Center(child: Text('No audit logs found.', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)));
                   }
                   return _buildDataTable(provider);
                 },
@@ -199,19 +200,27 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
   }
 
   Widget _buildFilters() {
+    final cardColor = Theme.of(context).cardColor;
+    final dividerColor = Theme.of(context).dividerColor;
+    final textOnSurface = Theme.of(context).colorScheme.onSurface;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AdminTheme.surface,
+        color: cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AdminTheme.border),
+        border: Border.all(color: dividerColor),
       ),
-      child: Row(
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           SizedBox(
             width: 250,
             child: TextField(
               controller: _searchController,
+              style: TextStyle(color: textOnSurface, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Search by user email or name',
                 prefixIcon: const Icon(Icons.search, size: 20),
@@ -221,17 +230,19 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
               onSubmitted: (_) => _onSearch(),
             ),
           ),
-          const SizedBox(width: 16),
           DropdownButtonHideUnderline(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                border: Border.all(color: AdminTheme.border),
+                border: Border.all(color: dividerColor),
                 borderRadius: BorderRadius.circular(8),
+                color: cardColor,
               ),
               child: DropdownButton<String>(
                 value: _selectedModule,
-                items: _modules.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+                dropdownColor: cardColor,
+                style: TextStyle(color: textOnSurface, fontSize: 14),
+                items: _modules.map((m) => DropdownMenuItem(value: m, child: Text(m, style: TextStyle(color: textOnSurface)))).toList(),
                 onChanged: (val) {
                   if (val != null) {
                     setState(() { _selectedModule = val; });
@@ -241,7 +252,6 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
               ),
             ),
           ),
-          const Spacer(),
           OutlinedButton.icon(
             onPressed: () {
               setState(() {
@@ -253,7 +263,6 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
             icon: const Icon(Icons.clear),
             label: const Text('Clear Filters'),
           ),
-          const SizedBox(width: 16),
           ElevatedButton.icon(
             onPressed: _exportData,
             icon: const Icon(Icons.download),
@@ -269,88 +278,80 @@ class _AuditDashboardScreenState extends State<AuditDashboardScreen> {
   }
 
   Widget _buildDataTable(AuditProvider provider) {
+    final cardColor = Theme.of(context).cardColor;
+    final dividerColor = Theme.of(context).dividerColor;
+    final textOnSurface = Theme.of(context).colorScheme.onSurface;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AdminTheme.surface,
+        color: cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AdminTheme.border),
+        border: Border.all(color: dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: SingleChildScrollView(
-              child: DataTable(
-                headingRowColor: MaterialStateProperty.all(AdminTheme.background),
-                dataRowMinHeight: 60,
-                dataRowMaxHeight: 60,
-                columns: const [
-                  DataColumn(label: Text('Timestamp', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Module', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('User', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
-                ],
-                rows: provider.logs.map((log) {
-                  return DataRow(cells: [
-                    DataCell(Text(_dateFormat.format(log.timestamp.toLocal()))),
-                    DataCell(
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AdminTheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(cardColor),
+                  dataRowMinHeight: 60,
+                  dataRowMaxHeight: 60,
+                  columns: [
+                    DataColumn(label: Text('Timestamp', style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface))),
+                    DataColumn(label: Text('Module', style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface))),
+                    DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface))),
+                    DataColumn(label: Text('User', style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface))),
+                    DataColumn(label: Text('Details', style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface))),
+                  ],
+                  rows: provider.logs.map((log) {
+                    return DataRow(cells: [
+                      DataCell(Text(_dateFormat.format(log.timestamp.toLocal()), style: TextStyle(color: textOnSurface))),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AdminTheme.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(log.module, style: const TextStyle(color: AdminTheme.primary, fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
-                        child: Text(log.module, style: const TextStyle(color: AdminTheme.primary, fontSize: 12)),
-                      )
-                    ),
-                    DataCell(Text(log.action)),
-                    DataCell(Text(log.userName ?? log.userEmail ?? 'System')),
-                    DataCell(
-                      TextButton.icon(
-                        icon: const Icon(Icons.visibility, size: 16),
-                        label: const Text('View'),
-                        onPressed: () => _showDiffDialog(log),
-                      )
-                    ),
-                  ]);
-                }).toList(),
+                      ),
+                      DataCell(Text(log.action, style: TextStyle(color: textOnSurface))),
+                      DataCell(Text(log.userName ?? log.userEmail ?? 'Unknown', style: TextStyle(color: textOnSurface))),
+                      DataCell(
+                        InkWell(
+                          onTap: () => _showDiffDialog(log),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.visibility_outlined, size: 16, color: AdminTheme.primary),
+                              SizedBox(width: 4),
+                              Text('View', style: TextStyle(color: AdminTheme.primary, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ]);
+                  }).toList(),
+                ),
               ),
             ),
           ),
-          _buildPagination(provider),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPagination(AuditProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AdminTheme.border)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Showing ${provider.logs.length} of ${provider.totalItems} entries'),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: provider.currentPage > 1
-                    ? () => provider.fetchLogs(page: provider.currentPage - 1)
-                    : null,
-              ),
-              Text('Page ${provider.currentPage} of ${provider.totalPages}'),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: provider.currentPage < provider.totalPages
-                    ? () => provider.fetchLogs(page: provider.currentPage + 1)
-                    : null,
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Showing ${provider.logs.length} entries',
+                  style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color, fontSize: 13),
+                ),
+              ],
+            ),
           ),
         ],
       ),

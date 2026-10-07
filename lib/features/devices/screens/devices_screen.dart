@@ -303,54 +303,60 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 ? const Center(child: CircularProgressIndicator())
                 : Container(
                     width: double.infinity,
-                    decoration: BoxDecoration(color: AdminTheme.surface, borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: Theme.of(context).dividerColor)),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
+                        final textOnSurface = Theme.of(context).colorScheme.onSurface;
+                        final textMuted     = Theme.of(context).textTheme.bodySmall?.color ?? AdminTheme.textSecondary;
+
                         return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                              headingTextStyle: const TextStyle(color: AdminTheme.textSecondary, fontWeight: FontWeight.bold),
-                              dataTextStyle: const TextStyle(color: AdminTheme.textPrimary),
-                              columns: const [
-                          DataColumn(label: Text('Device ID')),
-                          DataColumn(label: Text('Firmware')),
-                          DataColumn(label: Text('Status')),
-                          DataColumn(label: Text('Vehicle')),
-                          DataColumn(label: Text('Org')),
-                          DataColumn(label: Text('Actions')),
-                        ],
-                        rows: _devices.map((device) {
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(device['device_id']?.toString() ?? 'N/A')),
-                              DataCell(Text(device['firmware_version']?.toString() ?? 'N/A')),
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(device['status']).withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    device['status']?.toString() ?? 'Unknown',
-                                    style: TextStyle(color: _getStatusColor(device['status']), fontWeight: FontWeight.bold, fontSize: 12),
+                          scrollDirection: Axis.vertical,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                                headingTextStyle: TextStyle(color: textMuted, fontWeight: FontWeight.bold),
+                                dataTextStyle: TextStyle(color: textOnSurface),
+                                columns: const [
+                            DataColumn(label: Text('Device ID')),
+                            DataColumn(label: Text('Firmware')),
+                            DataColumn(label: Text('Status')),
+                            DataColumn(label: Text('Vehicle')),
+                            DataColumn(label: Text('Org')),
+                            DataColumn(label: Text('Actions')),
+                          ],
+                          rows: _devices.map((device) {
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(device['device_id']?.toString() ?? 'N/A', style: TextStyle(color: textOnSurface, fontWeight: FontWeight.bold))),
+                                DataCell(Text(device['firmware_version']?.toString() ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                DataCell(
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColor(device['status']).withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      device['status']?.toString() ?? 'Unknown',
+                                      style: TextStyle(color: _getStatusColor(device['status']), fontWeight: FontWeight.bold, fontSize: 12),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              DataCell(Text(device['assigned_vehicle']?.toString() ?? 'N/A')),
-                              DataCell(Text(device['org_name']?.toString() ?? 'N/A')),
-                              DataCell(
-                                IconButton(
-                                  icon: const Icon(Icons.visibility, color: Colors.blue),
-                                  tooltip: 'View Details',
-                                  onPressed: () => _showDetails(device['device_id']),
+                                DataCell(Text(device['assigned_vehicle']?.toString() ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                DataCell(Text(device['org_name']?.toString() ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                DataCell(
+                                  IconButton(
+                                    icon: const Icon(Icons.visibility, color: Colors.blue),
+                                    tooltip: 'View Details',
+                                    onPressed: () => _showDetails(device['device_id']),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
-                      ), // closes DataTable
-                    ); // closes SingleChildScrollView
+                              ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                );
                 },
               ),
             ),

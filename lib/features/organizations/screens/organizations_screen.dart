@@ -275,8 +275,12 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textOnSurface = Theme.of(context).colorScheme.onSurface;
+    final cardColor     = Theme.of(context).cardColor;
+    final dividerColor  = Theme.of(context).dividerColor;
+
     return Scaffold(
-      backgroundColor: AdminTheme.background, // Explicitly use the dark theme background
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -285,9 +289,9 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Organizations',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AdminTheme.textPrimary),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: textOnSurface),
                 ),
             Wrap(
               spacing: 16,
@@ -298,28 +302,29 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                   width: 300,
                   child: TextField(
                     onChanged: _onSearchChanged,
-                    style: const TextStyle(color: AdminTheme.textPrimary),
+                    style: TextStyle(color: textOnSurface),
                     decoration: InputDecoration(
                       hintText: 'Search by Company, City, etc.',
-                      hintStyle: const TextStyle(color: AdminTheme.textMuted),
-                      prefixIcon: const Icon(Icons.search, color: AdminTheme.textSecondary),
+                      hintStyle: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
+                      prefixIcon: Icon(Icons.search, color: Theme.of(context).textTheme.bodySmall?.color),
                       filled: true,
-                      fillColor: AdminTheme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                      fillColor: cardColor,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: dividerColor)),
                     ),
                   ),
                 ),
                 SizedBox(
                   width: 200,
                   child: Theme(
-                    data: Theme.of(context).copyWith(canvasColor: AdminTheme.surface),
+                    data: Theme.of(context).copyWith(canvasColor: cardColor),
                     child: DropdownButtonFormField<String>(
                       value: _filterStatus,
                       decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12), border: InputBorder.none),
                       isExpanded: true,
-                      style: const TextStyle(color: AdminTheme.textPrimary),
+                      dropdownColor: cardColor,
+                      style: TextStyle(color: textOnSurface),
                       items: ['All', 'Draft', 'Pending Review', 'Approved', 'Rejected', 'Suspended']
-                          .map((e) => DropdownMenuItem(value: e, child: Text('Status: $e', overflow: TextOverflow.ellipsis)))
+                          .map((e) => DropdownMenuItem(value: e, child: Text('Status: $e', style: TextStyle(color: textOnSurface), overflow: TextOverflow.ellipsis)))
                           .toList(),
                       onChanged: (v) {
                         if (v != null) {
@@ -345,34 +350,37 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _organizations.isEmpty
-                      ? const Center(child: Text('No organizations found', style: TextStyle(color: AdminTheme.textSecondary)))
+                      ? Center(child: Text('No organizations found', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)))
                       : Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: AdminTheme.surface,
-                            border: Border.all(color: AdminTheme.border, width: 1.2),
+                            color: cardColor,
+                            border: Border.all(color: dividerColor, width: 1.2),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: AdminTheme.cardShadow,
                           ),
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               return SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: DataTable(
-                                    headingTextStyle: const TextStyle(fontWeight: FontWeight.bold, color: AdminTheme.textPrimary),
-                                    showCheckboxColumn: false,
-                                    columns: const [
-                                      DataColumn(label: Text('Company Name')),
-                                      DataColumn(label: Text('Fleet Owner Name')),
-                                      DataColumn(label: Text('Fleet Owner Email')),
-                                      DataColumn(label: Text('Contact Phone')),
-                                      DataColumn(label: Text('Account Status')),
-                                      DataColumn(label: Text('Org Status')),
-                                      DataColumn(label: Text('City')),
-                                      DataColumn(label: Text('Joined At')),
-                                      DataColumn(label: Text('Actions')),
-                                    ],
-                                    rows: _organizations.map((org) {
+                                scrollDirection: Axis.vertical,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: DataTable(
+                                      headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface),
+                                      dataTextStyle: TextStyle(color: textOnSurface),
+                                      showCheckboxColumn: false,
+                                      columns: const [
+                                        DataColumn(label: Text('Company Name')),
+                                        DataColumn(label: Text('Fleet Owner Name')),
+                                        DataColumn(label: Text('Fleet Owner Email')),
+                                        DataColumn(label: Text('Contact Phone')),
+                                        DataColumn(label: Text('Account Status')),
+                                        DataColumn(label: Text('Org Status')),
+                                        DataColumn(label: Text('City')),
+                                        DataColumn(label: Text('Joined At')),
+                                        DataColumn(label: Text('Actions')),
+                                      ],
+                                      rows: _organizations.map((org) {
                                       final status = org['status'] ?? 'Unknown';
                                       final accStatus = org['account_status'] ?? 'Active';
                                       final phone = (org['phone'] != null && org['phone'].toString().isNotEmpty) ? org['phone'].toString() : (org['contact_number'] ?? 'N/A');
@@ -425,8 +433,9 @@ class _OrganizationsScreenState extends State<OrganizationsScreen> {
                                         ],
                                       );
                                     }).toList(),
-                                  ), // closes DataTable
-                                ); // closes SingleChildScrollView
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),

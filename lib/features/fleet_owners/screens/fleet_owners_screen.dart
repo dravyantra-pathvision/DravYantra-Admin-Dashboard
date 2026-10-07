@@ -470,43 +470,49 @@ class _FleetOwnersScreenState extends State<FleetOwnersScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _fleetOwners.isEmpty
-                      ? const Center(child: Text('No fleet owners found', style: TextStyle(color: AdminTheme.textSecondary)))
+                      ? Center(child: Text('No fleet owners found', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)))
                       : SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
                           child: Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: AdminTheme.surface,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AdminTheme.border, width: 1.2),
+                              border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                               boxShadow: AdminTheme.cardShadow,
                             ),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
+                                final textOnSurface = Theme.of(context).colorScheme.onSurface;
+                                final textMuted     = Theme.of(context).textTheme.bodySmall?.color ?? AdminTheme.textSecondary;
+
                                 return SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: ConstrainedBox(
                                     constraints: BoxConstraints(minWidth: constraints.maxWidth),
                                     child: DataTable(
-                                    columns: const [
-                                      DataColumn(label: Text('Name', style: TextStyle(color: AdminTheme.textSecondary))),
-                                      DataColumn(label: Text('Email', style: TextStyle(color: AdminTheme.textSecondary))),
-                                      DataColumn(label: Text('Organization', style: TextStyle(color: AdminTheme.textSecondary))),
-                                      DataColumn(label: Text('Account Status', style: TextStyle(color: AdminTheme.textSecondary))),
-                                      DataColumn(label: Text('Org Status', style: TextStyle(color: AdminTheme.textSecondary))),
-                                      DataColumn(label: Text('Vehicles', style: TextStyle(color: AdminTheme.textSecondary))),
-                                      DataColumn(label: Text('Actions', style: TextStyle(color: AdminTheme.textSecondary))),
+                                    headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface),
+                                    dataTextStyle: TextStyle(color: textOnSurface),
+                                    columns: [
+                                      DataColumn(label: Text('Name', style: TextStyle(color: textMuted))),
+                                      DataColumn(label: Text('Email', style: TextStyle(color: textMuted))),
+                                      DataColumn(label: Text('Organization', style: TextStyle(color: textMuted))),
+                                      DataColumn(label: Text('Account Status', style: TextStyle(color: textMuted))),
+                                      DataColumn(label: Text('Org Status', style: TextStyle(color: textMuted))),
+                                      DataColumn(label: Text('Vehicles', style: TextStyle(color: textMuted))),
+                                      DataColumn(label: Text('Actions', style: TextStyle(color: textMuted))),
                                     ],
                                     rows: _fleetOwners.map((owner) {
                                       final uid = owner['uid']?.toString() ?? '';
                                       final status = owner['account_status'] ?? 'Active';
                                       
                                       return DataRow(cells: [
-                                        DataCell(Text(owner['full_name'] ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary, fontWeight: FontWeight.bold))),
-                                        DataCell(Text(owner['email'] ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
-                                        DataCell(Text(owner['company_name'] ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
+                                        DataCell(Text(owner['full_name'] ?? 'N/A', style: TextStyle(color: textOnSurface, fontWeight: FontWeight.bold))),
+                                        DataCell(Text(owner['email'] ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                        DataCell(Text(owner['company_name'] ?? 'N/A', style: TextStyle(color: textOnSurface))),
                                         DataCell(Text(status, style: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold))),
                                         DataCell(Text(owner['organization_status'] ?? 'N/A', style: TextStyle(color: _getStatusColor(owner['organization_status'])))),
-                                        DataCell(Text(owner['vehicle_count']?.toString() ?? '0', style: const TextStyle(color: AdminTheme.textPrimary))),
+                                        DataCell(Text(owner['vehicle_count']?.toString() ?? '0', style: TextStyle(color: textOnSurface))),
                                         DataCell(Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [

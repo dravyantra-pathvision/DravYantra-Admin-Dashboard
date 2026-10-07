@@ -198,9 +198,9 @@ class _TripsScreenState extends State<TripsScreen> {
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             decoration: BoxDecoration(
-              color: AdminTheme.surface,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AdminTheme.border),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: Consumer<TripsProvider>(
               builder: (context, provider, child) {
@@ -213,8 +213,11 @@ class _TripsScreenState extends State<TripsScreen> {
                 }
 
                 if (provider.trips.isEmpty) {
-                  return const Center(child: Text('No trips found', style: TextStyle(color: AdminTheme.textSecondary)));
+                  return Center(child: Text('No trips found', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)));
                 }
+
+                final textOnSurface = Theme.of(context).colorScheme.onSurface;
+                final textMuted     = Theme.of(context).textTheme.bodySmall?.color ?? AdminTheme.textSecondary;
 
                 return Column(
                   children: [
@@ -224,15 +227,17 @@ class _TripsScreenState extends State<TripsScreen> {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: DataTable(
+                            headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface),
+                            dataTextStyle: TextStyle(color: textOnSurface),
                             showCheckboxColumn: false,
-                            columns: const [
-                              DataColumn(label: Expanded(child: Text('Trip ID', style: TextStyle(color: AdminTheme.textSecondary)))),
-                              DataColumn(label: Expanded(child: Text('Organization', style: TextStyle(color: AdminTheme.textSecondary)))),
-                              DataColumn(label: Expanded(child: Text('Vehicle No.', style: TextStyle(color: AdminTheme.textSecondary)))),
-                              DataColumn(label: Expanded(child: Text('Driver Name', style: TextStyle(color: AdminTheme.textSecondary)))),
-                              DataColumn(label: Expanded(child: Text('Status', style: TextStyle(color: AdminTheme.textSecondary)))),
-                              DataColumn(label: Expanded(child: Text('Distance', style: TextStyle(color: AdminTheme.textSecondary)))),
-                              DataColumn(label: Expanded(child: Text('Actions', style: TextStyle(color: AdminTheme.textSecondary)))),
+                            columns: [
+                              DataColumn(label: Text('Trip ID', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Organization', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Vehicle No.', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Driver Name', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Status', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Distance', style: TextStyle(color: textMuted))),
+                              DataColumn(label: Text('Actions', style: TextStyle(color: textMuted))),
                             ],
                             rows: provider.trips.map((trip) {
                               return DataRow(
@@ -240,12 +245,12 @@ class _TripsScreenState extends State<TripsScreen> {
                                   context.go('/trips/${trip.id}');
                                 },
                                 cells: [
-                                  DataCell(Text(trip.id, style: const TextStyle(fontWeight: FontWeight.bold, color: AdminTheme.textPrimary))),
-                                  DataCell(Text(trip.organizationName ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
-                                  DataCell(Text(trip.vehicle ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
-                                  DataCell(Text(trip.driver ?? 'N/A', style: const TextStyle(color: AdminTheme.textPrimary))),
+                                  DataCell(Text(trip.id, style: TextStyle(fontWeight: FontWeight.bold, color: textOnSurface))),
+                                  DataCell(Text(trip.organizationName ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                  DataCell(Text(trip.vehicle ?? 'N/A', style: TextStyle(color: textOnSurface))),
+                                  DataCell(Text(trip.driver ?? 'N/A', style: TextStyle(color: textOnSurface))),
                                   DataCell(_buildStatusBadge(trip.status ?? 'Unknown')),
-                                  DataCell(Text('${trip.distance?.toStringAsFixed(1) ?? '0.0'} km', style: const TextStyle(color: AdminTheme.textPrimary))),
+                                  DataCell(Text('${trip.distance?.toStringAsFixed(1) ?? '0.0'} km', style: TextStyle(color: textOnSurface))),
                                   DataCell(
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
