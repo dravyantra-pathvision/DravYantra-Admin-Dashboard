@@ -153,13 +153,13 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Reports & Export Center',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: AdminTheme.textPrimary)),
+                          color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 2),
-                  const Text('Generate, schedule, and download platform-wide reports',
-                      style: TextStyle(fontSize: 13, color: AdminTheme.textSecondary)),
+                  Text('Generate, schedule, and download platform-wide reports',
+                      style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color)),
                 ],
               ),
             ],
@@ -168,11 +168,11 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
 
         // ── Tabs ──────────────────────────────────────────────────────────────
         Container(
-          color: AdminTheme.surface,
+          color: Theme.of(context).cardColor,
           child: TabBar(
             controller: _tabController,
             labelColor: AdminTheme.primary,
-            unselectedLabelColor: AdminTheme.textSecondary,
+            unselectedLabelColor: Theme.of(context).textTheme.bodySmall?.color,
             indicatorColor: AdminTheme.primary,
             indicatorWeight: 3,
             labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -220,13 +220,14 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                       value: _reportType,
                       decoration: const InputDecoration(
                           labelText: 'Report Type', prefixIcon: Icon(Icons.description_outlined)),
-                      dropdownColor: AdminTheme.surface,
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                       items: _reportTypes
                           .map((t) => DropdownMenuItem(
                                 value: t,
                                 child: Text(t,
-                                    style: const TextStyle(
-                                        color: AdminTheme.textPrimary, fontSize: 14)),
+                                    style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurface, fontSize: 14)),
                               ))
                           .toList(),
                       onChanged: (v) => setState(() => _reportType = v!),
@@ -249,21 +250,22 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                             decoration: const InputDecoration(
                                 labelText: 'Organization',
                                 prefixIcon: Icon(Icons.business_outlined)),
-                            dropdownColor: AdminTheme.surface,
+                            dropdownColor: Theme.of(context).cardColor,
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                             items: [
-                              const DropdownMenuItem<String>(
+                              DropdownMenuItem<String>(
                                 value: null,
                                 child: Text('All Organizations',
                                     style: TextStyle(
-                                        color: AdminTheme.textPrimary, fontSize: 14)),
+                                        color: Theme.of(context).colorScheme.onSurface, fontSize: 14)),
                               ),
                               ..._orgs.map(
                                 (o) => DropdownMenuItem<String>(
                                   value: o['uid'],
                                   child: Text(
                                     o['company_name'] ?? o['uid'],
-                                    style: const TextStyle(
-                                        color: AdminTheme.textPrimary, fontSize: 14),
+                                    style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -276,6 +278,7 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                         Expanded(
                           child: TextFormField(
                             controller: _plateCtrl,
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                             decoration: const InputDecoration(
                               labelText: 'Vehicle Plate',
                               hintText: 'e.g. KA 33',
@@ -303,11 +306,21 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                             decoration: const InputDecoration(
                                 labelText: 'Export Format',
                                 prefixIcon: Icon(Icons.file_present_outlined)),
-                            dropdownColor: AdminTheme.surface,
+                            dropdownColor: Theme.of(context).cardColor,
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                             items: [
-                              _fmtItem('PDF', Icons.picture_as_pdf),
-                              _fmtItem('Excel', Icons.table_chart),
-                              _fmtItem('CSV', Icons.data_array),
+                              DropdownMenuItem(
+                                value: 'PDF',
+                                child: Row(children: [const Icon(Icons.picture_as_pdf, size: 16, color: AdminTheme.danger), const SizedBox(width: 8), Text('PDF', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14))]),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Excel',
+                                child: Row(children: [const Icon(Icons.table_chart, size: 16, color: AdminTheme.success), const SizedBox(width: 8), Text('Excel', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14))]),
+                              ),
+                              DropdownMenuItem(
+                                value: 'CSV',
+                                child: Row(children: [const Icon(Icons.data_array, size: 16, color: AdminTheme.info), const SizedBox(width: 8), Text('CSV', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14))]),
+                              ),
                             ],
                             onChanged: (v) => setState(() => _format = v!),
                           ),
@@ -319,13 +332,14 @@ class _ReportsDashboardScreenState extends State<ReportsDashboardScreen>
                             decoration: const InputDecoration(
                                 labelText: 'Delivery Method',
                                 prefixIcon: Icon(Icons.cloud_download_outlined)),
-                            dropdownColor: AdminTheme.surface,
+                            dropdownColor: Theme.of(context).cardColor,
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                             items: ['Download Now', 'Schedule automated email']
                                 .map((t) => DropdownMenuItem(
                                       value: t,
                                       child: Text(t,
-                                          style: const TextStyle(
-                                              color: AdminTheme.textPrimary, fontSize: 14)),
+                                          style: TextStyle(
+                                              color: Theme.of(context).colorScheme.onSurface, fontSize: 14)),
                                     ))
                                 .toList(),
                             onChanged: (v) => setState(() => _deliveryType = v!),

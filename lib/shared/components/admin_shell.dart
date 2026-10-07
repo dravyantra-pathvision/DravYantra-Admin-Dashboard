@@ -54,7 +54,7 @@ class AdminShell extends StatelessWidget {
                     ),
                     Expanded(
                       child: Container(
-                        color: AdminTheme.background,
+                        color: Theme.of(context).scaffoldBackgroundColor,
                         child: child,
                       ),
                     ),

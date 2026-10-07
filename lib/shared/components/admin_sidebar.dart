@@ -8,18 +8,23 @@ class AdminSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final sidebarBg     = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final sidebarBorder = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final logoTextColor  = isDark ? Colors.white : const Color(0xFF0F172A);
 
     return Container(
       width: AppConstants.sidebarWidth,
-      decoration: const BoxDecoration(
-        color: Colors.white, // Clean White Sidebar matching user reference image
-        border: Border(right: BorderSide(color: Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(
+        color: sidebarBg,
+        border: Border(right: BorderSide(color: sidebarBorder)),
       ),
       child: Column(
         children: [
           const SizedBox(height: 24),
 
-          // Brand Logo Header (Matching reference logo style)
+          // Brand Logo Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -27,18 +32,18 @@ class AdminSidebar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0284C7).withOpacity(0.1),
+                    color: const Color(0xFF0284C7).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.grid_view_rounded, color: Color(0xFF0284C7), size: 24),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'DravYantra',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
+                    color: logoTextColor,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -47,7 +52,7 @@ class AdminSidebar extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Menu Items List (No category headers, flat clean layout matching reference)
+          // Menu Items List
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -77,7 +82,7 @@ class AdminSidebar extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: const Text(
               'Admin Panel v1.0.0',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w500),
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 11, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -102,6 +107,12 @@ class _SidebarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isActive = currentRoute == route || (route != '/dashboard' && currentRoute.startsWith(route));
+    final isDark   = Theme.of(context).brightness == Brightness.dark;
+
+    final activeBg = isDark ? const Color(0xFF1E3A8A).withOpacity(0.5) : const Color(0xFFE0F2FE);
+    final activeFg = isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7);
+    final inactiveFg = isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155);
+    final inactiveIcon = isDark ? const Color(0xFF64748B) : const Color(0xFF64748B);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -114,14 +125,13 @@ class _SidebarItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              // Soft blue active pill background (Matching user reference image 1)
-              color: isActive ? const Color(0xFFE0F2FE) : Colors.transparent,
+              color: isActive ? activeBg : Colors.transparent,
             ),
             child: Row(
               children: [
                 Icon(
                   icon,
-                  color: isActive ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                  color: isActive ? activeFg : inactiveIcon,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -129,7 +139,7 @@ class _SidebarItem extends StatelessWidget {
                   child: Text(
                     title,
                     style: TextStyle(
-                      color: isActive ? const Color(0xFF0284C7) : const Color(0xFF334155),
+                      color: isActive ? activeFg : inactiveFg,
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                       fontSize: 14,
                     ),
@@ -137,7 +147,7 @@ class _SidebarItem extends StatelessWidget {
                 ),
                 Icon(
                   Icons.keyboard_arrow_right_rounded,
-                  color: isActive ? const Color(0xFF0284C7) : const Color(0xFFCBD5E1),
+                  color: isActive ? activeFg : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
                   size: 18,
                 ),
               ],
