@@ -57,10 +57,9 @@ class _LiveMapViewState extends State<LiveMapView> {
                 ),
               ),
               children: [
-                // English-only CARTO Voyager Map Tiles (latin labels only)
+                // Clean OpenStreetMap Tiles (free, high quality, no API key required)
                 TileLayer(
-                  urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-                  subdomains: const ['a', 'b', 'c', 'd'],
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.dravyantra.admin',
                 ),
 
@@ -163,12 +162,12 @@ class _LiveMapViewState extends State<LiveMapView> {
                   width: 320,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AdminTheme.surface,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AdminTheme.border),
+                    border: Border.all(color: Theme.of(context).dividerColor),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withOpacity(0.15),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -187,43 +186,28 @@ class _LiveMapViewState extends State<LiveMapView> {
                               const SizedBox(width: 8),
                               Text(
                                 selectedVehicle['plate'] ?? 'Selected Vehicle',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AdminTheme.textPrimary),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
                             ],
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, size: 18, color: AdminTheme.textSecondary),
+                            icon: Icon(Icons.close, size: 18, color: Theme.of(context).textTheme.bodySmall?.color),
                             onPressed: () => provider.selectVehicle(null),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
-                      const Divider(color: AdminTheme.border, height: 1),
+                      Divider(color: Theme.of(context).dividerColor, height: 1),
                       const SizedBox(height: 12),
-                      _buildInfoRow('Driver Name', selectedVehicle['driver_name'] ?? 'Assigned Driver'),
-                      _buildInfoRow('Current Speed', '${selectedVehicle['speed'] ?? 0} km/h'),
-                      _buildInfoRow('Ignition Status', (selectedVehicle['ignition'] == true || selectedVehicle['status'] == 'moving') ? 'ON 🟢' : 'OFF 🔴'),
-                      _buildInfoRow('Fuel Tank Level', '${selectedVehicle['fuel'] ?? 75} %'),
-                      _buildInfoRow('Vehicle Status', (selectedVehicle['status'] ?? 'Active').toString().toUpperCase()),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AdminTheme.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                          ),
-                          icon: const Icon(Icons.center_focus_strong, size: 16),
-                          label: const Text('Center Camera on Vehicle'),
-                          onPressed: () {
-                            if (selectedVehicle['lat'] != null && selectedVehicle['lng'] != null) {
-                              _centerMapOnVehicle(selectedVehicle['lat'], selectedVehicle['lng']);
-                            }
-                          },
-                        ),
-                      ),
+                      _buildInfoRow(context, 'Driver Name', selectedVehicle['driver_name'] ?? 'Assigned Driver'),
+                      _buildInfoRow(context, 'Current Speed', '${selectedVehicle['speed'] ?? 0} km/h'),
+                      _buildInfoRow(context, 'Ignition Status', (selectedVehicle['ignition'] == true || selectedVehicle['status'] == 'moving') ? 'ON 🟢' : 'OFF 🔴'),
+                      _buildInfoRow(context, 'Fuel Tank Level', '${selectedVehicle['fuel'] ?? 75} %'),
+                      _buildInfoRow(context, 'Vehicle Status', (selectedVehicle['status'] ?? 'Active').toString().toUpperCase()),
                     ],
                   ),
                 ),
@@ -234,14 +218,14 @@ class _LiveMapViewState extends State<LiveMapView> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AdminTheme.textSecondary, fontSize: 12)),
-          Text(value, style: const TextStyle(color: AdminTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(label, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color ?? AdminTheme.textSecondary, fontSize: 12)),
+          Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );

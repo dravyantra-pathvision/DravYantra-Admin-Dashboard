@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'app/theme.dart';
+import 'app/theme_provider.dart';
 import 'app/router.dart';
 import 'features/authentication/providers/auth_provider.dart';
 import 'features/vehicles/providers/vehicles_provider.dart';
@@ -22,10 +23,6 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase (assuming options are handled or default config exists)
-  // For web, it relies on firebase-config.js in index.html usually,
-  // or we need to provide FirebaseOptions. We'll wrap in try-catch to allow UI 
-  // to load even if Firebase config is missing temporarily.
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -40,6 +37,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => VehiclesProvider()),
         ChangeNotifierProvider(create: (_) => DriversProvider()),
@@ -73,9 +71,12 @@ class _AdminAppState extends State<AdminApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
     return MaterialApp.router(
       title: 'DravYantra Admin',
-      theme: AdminTheme.darkTheme,
+      theme: AdminTheme.lightTheme,
+      darkTheme: AdminTheme.darkTheme,
+      themeMode: themeProvider.themeMode,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
     );

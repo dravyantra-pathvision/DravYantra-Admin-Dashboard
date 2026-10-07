@@ -12,11 +12,10 @@ class AppConstants {
   static const String tokenKey    = 'dy_admin_token';
   static const String roleKey     = 'dy_admin_role';
   static const String userKey     = 'dy_admin_user';
-
   // API
   static const String apiBaseUrl  = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://16-112-99-7.nip.io',
+    defaultValue: 'http://localhost:5000',
   );
 
   // Session
